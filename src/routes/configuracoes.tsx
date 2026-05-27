@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { cn, initialsOf } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { testChatwootConnection } from "@/lib/chatwoot.functions";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — Berry" }] }),
@@ -186,13 +187,11 @@ function IntegrationsTab() {
       return;
     }
     try {
-      const res = await fetch(`${url}/api/v1/profile`, {
-        headers: { api_access_token: token },
-      });
-      if (res.ok) toast.success("Chatwoot: conexão OK");
-      else toast.error(`Chatwoot: erro ${res.status}`);
-    } catch {
-      toast.error("Chatwoot: falha de rede");
+      const result = await testChatwootConnection({ data: { url, token } });
+      if (result.ok) toast.success("Chatwoot: conexão OK");
+      else toast.error(`Chatwoot: ${result.status || "erro"} ${result.message}`);
+    } catch (e) {
+      toast.error(`Chatwoot: ${(e as Error).message}`);
     }
   }
 
