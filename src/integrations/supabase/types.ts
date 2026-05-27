@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          id: string
+          name?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      call_logs: {
+        Row: {
+          agent_id: string | null
+          ai_summary: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          duration_seconds: number | null
+          hubspot_contact_id: string | null
+          id: string
+          recording_url: string | null
+          status: string | null
+          transcript: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          ai_summary?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          hubspot_contact_id?: string | null
+          id?: string
+          recording_url?: string | null
+          status?: string | null
+          transcript?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          ai_summary?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          hubspot_contact_id?: string | null
+          id?: string
+          recording_url?: string | null
+          status?: string | null
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_logs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hubspot_cache: {
+        Row: {
+          cached_at: string
+          contact_data: Json | null
+          deal_data: Json | null
+          phone: string
+        }
+        Insert: {
+          cached_at?: string
+          contact_data?: Json | null
+          deal_data?: Json | null
+          phone: string
+        }
+        Update: {
+          cached_at?: string
+          contact_data?: Json | null
+          deal_data?: Json | null
+          phone?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          chatwoot_account_id: string | null
+          chatwoot_token: string | null
+          chatwoot_url: string | null
+          hubspot_token: string | null
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          chatwoot_account_id?: string | null
+          chatwoot_token?: string | null
+          chatwoot_url?: string | null
+          hubspot_token?: string | null
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          chatwoot_account_id?: string | null
+          chatwoot_token?: string | null
+          chatwoot_url?: string | null
+          hubspot_token?: string | null
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
