@@ -196,6 +196,34 @@ export const createWhatsAppTemplate = createServerFn({ method: "POST" })
     return json as { id: string; status: string };
   });
 
+export const getChatwootAgents = createServerFn({ method: "POST" })
+  .inputValidator((data: Record<string, never>) => data)
+  .handler(async () => {
+    const s = await getChatwootSettings();
+    const res = await fetch(
+      `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/agents`,
+      { headers: { api_access_token: s.chatwoot_token! } }
+    );
+    if (!res.ok) throw new Error(`Chatwoot error: ${res.status}`);
+    return (await res.json()) as { id: number; name: string; email: string; availability_status: string }[];
+  });
+
+export const assignChatwootConversation = createServerFn({ method: "POST" })
+  .inputValidator((data: { conversationId: number; assigneeId: number | null }) => data)
+  .handler(async ({ data }) => {
+    const s = await getChatwootSettings();
+    const res = await fetch(
+      `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/conversations/${data.conversationId}/assignments`,
+      {
+        method: "POST",
+        headers: { api_access_token: s.chatwoot_token!, "Content-Type": "application/json" },
+        body: JSON.stringify({ assignee_id: data.assigneeId }),
+      }
+    );
+    if (!res.ok) throw new Error(`Chatwoot error: ${res.status}`);
+    return await res.json();
+  });
+
 export const startConversationWithTemplate = createServerFn({ method: "POST" })
   .inputValidator((data: {
     phone: string;
@@ -205,6 +233,7 @@ export const startConversationWithTemplate = createServerFn({ method: "POST" })
     language: string;
     category: string;
     templateBody: string;
+    assigneeEmail?: string;
   }) => data)
   .handler(async ({ data }) => {
     const s = await getChatwootSettings();
@@ -268,6 +297,29 @@ export const startConversationWithTemplate = createServerFn({ method: "POST" })
       }
     );
     if (!msgRes.ok) throw new Error(`Chatwoot send template error: ${msgRes.status}`);
+
+    // Auto-assign conversation to the agent who started it
+    if (data.assigneeEmail) {
+      const agentsRes = await fetch(
+        `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/agents`,
+        { headers: { api_access_token: s.chatwoot_token! } }
+      );
+      if (agentsRes.ok) {
+        const agents: { id: number; email: string }[] = await agentsRes.json();
+        const match = agents.find((a) => a.email === data.assigneeEmail);
+        if (match) {
+          await fetch(
+            `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/conversations/${conv.id}/assignments`,
+            {
+              method: "POST",
+              headers: { api_access_token: s.chatwoot_token!, "Content-Type": "application/json" },
+              body: JSON.stringify({ assignee_id: match.id }),
+            }
+          );
+        }
+      }
+    }
+
     return { conversationId: conv.id as number };
   });
 

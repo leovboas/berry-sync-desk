@@ -38,10 +38,12 @@ function getBodyText(t: any): string {
 
 function TemplateModal({
   contact,
+  agentEmail,
   onClose,
   onStarted,
 }: {
   contact: any;
+  agentEmail: string;
   onClose: () => void;
   onStarted: (convId: number) => void;
 }) {
@@ -87,6 +89,7 @@ function TemplateModal({
           language: selected.language ?? "pt_BR",
           category: selected.category ?? "MARKETING",
           templateBody: body,
+          assigneeEmail: agentEmail,
         },
       });
       onStarted(conversationId);
@@ -221,18 +224,19 @@ function ContatosPage() {
   const [loadingMy, setLoadingMy] = useState(true);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [convModal, setConvModal] = useState<any | null>(null);
+  const [agentEmail, setAgentEmail] = useState("");
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) { setLoadingMy(false); return; }
-      // Use hubspot_email if configured, otherwise fall back to auth email
       const { data: agent } = await supabase
         .from("agents")
-        .select("hubspot_email")
+        .select("hubspot_email, email")
         .eq("id", u.user.id)
         .maybeSingle();
       const ownerEmail = (agent as any)?.hubspot_email || u.user.email || "";
+      setAgentEmail(u.user.email || "");
       if (!ownerEmail) { setLoadingMy(false); return; }
       try {
         const result = await getMyHubSpotContacts({ data: { ownerEmail } });
@@ -368,6 +372,7 @@ function ContatosPage() {
       {convModal && (
         <TemplateModal
           contact={convModal}
+          agentEmail={agentEmail}
           onClose={() => setConvModal(null)}
           onStarted={() => {
             setConvModal(null);

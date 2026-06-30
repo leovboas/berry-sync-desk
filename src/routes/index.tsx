@@ -11,6 +11,8 @@ import {
   sendChatwootAttachment,
   updateChatwootConversationStatus,
   getChatwootTemplates,
+  getChatwootAgents,
+  assignChatwootConversation,
 } from "@/lib/chatwoot.functions";
 import {
   getHubSpotContactByPhone,
@@ -801,7 +803,19 @@ function AtendimentoPage() {
 
       {/* Right: lead panel */}
       <aside className="w-[320px] overflow-y-auto border-l border-[#e5e5e5] p-4" style={{ background: "#f8f8f8" }}>
-        {active ? <LeadPanel conv={active} hubContact={hubContact} hubLoading={hubLoading} visibleFields={visibleFields} /> : null}
+        {active ? (
+          <LeadPanel
+            conv={active}
+            messages={messages}
+            hubContact={hubContact}
+            hubLoading={hubLoading}
+            visibleFields={visibleFields}
+            onConvUpdate={async () => {
+              const updated = await getChatwootConversations({ data: { status: tab } });
+              setConversations(updated);
+            }}
+          />
+        ) : null}
       </aside>
     </div>
   );
@@ -861,12 +875,14 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function LeadPanel({
-  conv, hubContact, hubLoading, visibleFields,
+  conv, messages, hubContact, hubLoading, visibleFields, onConvUpdate,
 }: {
   conv: any;
+  messages: any[];
   hubContact: any | null;
   hubLoading: boolean;
   visibleFields: HsField[];
+  onConvUpdate: () => Promise<void>;
 }) {
   const name = conv.meta?.sender?.name ?? "Desconhecido";
   const phone = conv.meta?.sender?.phone_number ?? "";
@@ -877,6 +893,44 @@ function LeadPanel({
   const [notesLoading, setNotesLoading] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+
+  // Assignment
+  const [chatwootAgents, setChatwootAgents] = useState<{ id: number; name: string; email: string; availability_status: string }[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
+  const [assigning, setAssigning] = useState(false);
+
+  useEffect(() => {
+    getChatwootAgents({ data: {} as Record<string, never> })
+      .then(setChatwootAgents)
+      .catch(console.error);
+  }, []);
+
+  // Pre-select current assignee
+  useEffect(() => {
+    const assigneeId = conv.meta?.assignee?.id;
+    setSelectedAgentId(assigneeId ? String(assigneeId) : "");
+  }, [conv.meta?.assignee?.id]);
+
+  async function handleAssign() {
+    const agentId = selectedAgentId ? Number(selectedAgentId) : null;
+    setAssigning(true);
+    try {
+      await assignChatwootConversation({ data: { conversationId: conv.id, assigneeId: agentId } });
+      await onConvUpdate();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAssigning(false);
+    }
+  }
+
+  // Activity log: message_type=2 (Chatwoot assignment/status events)
+  const activityLog = useMemo(
+    () => messages
+      .filter((m) => m.message_type === 2 && m.content)
+      .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0)),
+    [messages]
+  );
 
   useEffect(() => {
     if (!hubContact?.id) { setNotes([]); return; }
@@ -983,8 +1037,65 @@ function LeadPanel({
         <div className="space-y-2.5 text-sm">
           <Field label="Caixa de entrada" value={conv.inbox_id ? `Inbox #${conv.inbox_id}` : "—"} />
           <Field label="Conversa" value={`#${conv.id}`} />
-          {conv.assignee?.name && <Field label="Agente" value={conv.assignee.name} />}
         </div>
+      </div>
+
+      {/* Atribuição */}
+      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-4">
+        <div className="label-uppercase mb-3">Atribuição</div>
+
+        {/* Atual */}
+        <div className="mb-3 flex items-center gap-2">
+          {conv.meta?.assignee ? (
+            <>
+              <div
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+                style={{ background: "#00e186", color: "#090909" }}
+              >
+                {initialsOf(conv.meta.assignee.name)}
+              </div>
+              <span className="text-sm text-[#090909]">{conv.meta.assignee.name}</span>
+            </>
+          ) : (
+            <span className="text-sm text-[#999]">Não atribuído</span>
+          )}
+        </div>
+
+        {/* Dropdown + botão */}
+        <div className="flex gap-2">
+          <select
+            value={selectedAgentId}
+            onChange={(e) => setSelectedAgentId(e.target.value)}
+            className="flex-1 rounded-md border border-[#e5e5e5] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#090909]"
+          >
+            <option value="">Sem atribuição</option>
+            {chatwootAgents.map((a) => (
+              <option key={a.id} value={String(a.id)}>{a.name}</option>
+            ))}
+          </select>
+          <Button
+            size="sm"
+            className="shrink-0 bg-[#090909] text-white hover:bg-[#090909]/90"
+            onClick={handleAssign}
+            disabled={assigning}
+          >
+            {assigning ? <Loader2 className="h-3 w-3 animate-spin" /> : "Atribuir"}
+          </Button>
+        </div>
+
+        {/* Histórico de atividades */}
+        {activityLog.length > 0 && (
+          <div className="mt-3 space-y-1.5 border-t border-[#f0f0f0] pt-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#999]">Histórico</p>
+            {activityLog.map((m) => (
+              <div key={m.id} className="text-[11px] text-[#999]">
+                <span className="text-[#ccc]">{timeAgo(new Date((m.created_at as number) * 1000).toISOString())} atrás</span>
+                {" — "}
+                <span>{m.content}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Button
