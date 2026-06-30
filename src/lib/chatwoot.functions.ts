@@ -309,13 +309,30 @@ export const startConversationWithTemplate = createServerFn({ method: "POST" })
       }
     }
 
+    // Create contact_inbox so Chatwoot has a source_id (phone) to send WhatsApp messages
+    let contactInboxId: number | null = null;
+    const ciRes = await fetch(
+      `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/contacts/${contactId}/contact_inboxes`,
+      {
+        method: "POST",
+        headers: { api_access_token: s.chatwoot_token!, "Content-Type": "application/json" },
+        body: JSON.stringify({ inbox_id: inboxId }),
+      }
+    );
+    if (ciRes.ok) {
+      const ci = await ciRes.json();
+      contactInboxId = ci.payload?.id ?? ci.id ?? null;
+    }
+
     // Create conversation
+    const convBody: Record<string, any> = { inbox_id: inboxId, contact_id: contactId };
+    if (contactInboxId) convBody.contact_inbox_id = contactInboxId;
     const convRes = await fetch(
       `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/conversations`,
       {
         method: "POST",
         headers: { api_access_token: s.chatwoot_token!, "Content-Type": "application/json" },
-        body: JSON.stringify({ inbox_id: inboxId, contact_id: contactId }),
+        body: JSON.stringify(convBody),
       }
     );
     if (!convRes.ok) {
@@ -342,7 +359,10 @@ export const startConversationWithTemplate = createServerFn({ method: "POST" })
         }),
       }
     );
-    if (!msgRes.ok) throw new Error(`Chatwoot send template error: ${msgRes.status}`);
+    if (!msgRes.ok) {
+      const errBody = await msgRes.text().catch(() => "");
+      throw new Error(`Chatwoot send template error: ${msgRes.status} — ${errBody.slice(0, 400)}`);
+    }
 
     // Auto-assign conversation to the agent who started it
     if (data.assigneeEmail) {
