@@ -109,11 +109,11 @@ function CreateTemplateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="flex w-full max-w-2xl flex-col rounded-[12px] bg-white shadow-xl" style={{ maxHeight: "90vh" }}>
+      <div className="flex w-full max-w-2xl flex-col rounded-[12px] bg-white dark:bg-[#1a1a1a] shadow-xl" style={{ maxHeight: "90vh" }}>
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-[#e5e5e5] px-6 py-4">
-          <h2 className="font-semibold text-[#090909]">Criar template</h2>
-          <button onClick={onClose} className="rounded-md p-1.5 text-[#666] hover:bg-[#f0f0f0]">
+        <div className="flex shrink-0 items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
+          <h2 className="font-semibold text-[#090909] dark:text-[#e8e8e8]">Criar template</h2>
+          <button onClick={onClose} className="rounded-md p-1.5 text-[#666] dark:text-[#909090] hover:bg-[#f0f0f0] dark:hover:bg-[#252525]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -121,8 +121,8 @@ function CreateTemplateModal({
         {success ? (
           <div className="flex flex-col items-center justify-center py-16">
             <CheckCircle className="mb-3 h-10 w-10 text-[#00e186]" />
-            <p className="font-semibold text-[#090909]">Template enviado para aprovação!</p>
-            <p className="mt-1 text-sm text-[#666]">Aparecerá na lista assim que a Meta aprovar.</p>
+            <p className="font-semibold text-[#090909] dark:text-[#e8e8e8]">Template enviado para aprovação!</p>
+            <p className="mt-1 text-sm text-[#666] dark:text-[#909090]">Aparecerá na lista assim que a Meta aprovar.</p>
           </div>
         ) : (
           <>
@@ -131,7 +131,7 @@ function CreateTemplateModal({
               <div className="flex flex-1 flex-col gap-4 overflow-y-auto pr-2">
                 {/* Nome */}
                 <div>
-                  <label className="mb-1 block text-[12px] font-semibold text-[#090909]">
+                  <label className="mb-1 block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">
                     Nome do template
                   </label>
                   <Input
@@ -141,19 +141,19 @@ function CreateTemplateModal({
                     className="h-9 text-sm"
                   />
                   {name && name !== slugName && (
-                    <p className="mt-1 text-[11px] text-[#999]">Será salvo como: <span className="font-mono">{slugName}</span></p>
+                    <p className="mt-1 text-[11px] text-[#999] dark:text-[#686868]">Será salvo como: <span className="font-mono">{slugName}</span></p>
                   )}
-                  <p className="mt-1 text-[11px] text-[#999]">Apenas letras minúsculas, números e _</p>
+                  <p className="mt-1 text-[11px] text-[#999] dark:text-[#686868]">Apenas letras minúsculas, números e _</p>
                 </div>
 
                 {/* Categoria + Idioma */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-[12px] font-semibold text-[#090909]">Categoria</label>
+                    <label className="mb-1 block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">Categoria</label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 text-sm"
+                      className="h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-3 text-sm"
                     >
                       {CATEGORIES.map((c) => (
                         <option key={c.value} value={c.value}>{c.label}</option>
@@ -161,11 +161,11 @@ function CreateTemplateModal({
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-[12px] font-semibold text-[#090909]">Idioma</label>
+                    <label className="mb-1 block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">Idioma</label>
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="h-9 w-full rounded-md border border-[#e5e5e5] bg-white px-3 text-sm"
+                      className="h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-3 text-sm"
                     >
                       {LANGUAGES.map((l) => (
                         <option key={l.value} value={l.value}>{l.label}</option>
@@ -176,8 +176,8 @@ function CreateTemplateModal({
 
                 {/* Cabeçalho */}
                 <div>
-                  <label className="mb-1 block text-[12px] font-semibold text-[#090909]">
-                    Cabeçalho <span className="font-normal text-[#999]">(opcional)</span>
+                  <label className="mb-1 block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">
+                    Cabeçalho <span className="font-normal text-[#999] dark:text-[#686868]">(opcional)</span>
                   </label>
                   <Input
                     value={header}
@@ -189,26 +189,26 @@ function CreateTemplateModal({
 
                 {/* Corpo */}
                 <div>
-                  <label className="mb-1 block text-[12px] font-semibold text-[#090909]">Corpo</label>
+                  <label className="mb-1 block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">Corpo</label>
                   <textarea
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
                     placeholder={"Olá {{1}}, tudo bem?\n\nUse {{1}}, {{2}} para variáveis."}
                     rows={4}
-                    className="w-full rounded-md border border-[#e5e5e5] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#090909]/20"
+                    className="w-full rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#090909] dark:focus:ring-[#888]/20"
                   />
-                  <p className="mt-1 text-[11px] text-[#999]">Use {"{{1}}"}, {"{{2}}"} para inserir variáveis</p>
+                  <p className="mt-1 text-[11px] text-[#999] dark:text-[#686868]">Use {"{{1}}"}, {"{{2}}"} para inserir variáveis</p>
                 </div>
 
                 {/* Exemplos de variáveis */}
                 {varCount > 0 && (
                   <div className="space-y-2">
-                    <label className="block text-[12px] font-semibold text-[#090909]">
-                      Exemplos das variáveis <span className="font-normal text-[#999]">(obrigatório para aprovação)</span>
+                    <label className="block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">
+                      Exemplos das variáveis <span className="font-normal text-[#999] dark:text-[#686868]">(obrigatório para aprovação)</span>
                     </label>
                     {syncedExamples.map((ex, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <span className="w-12 shrink-0 text-[12px] text-[#666]">{"{{" + (i + 1) + "}}"}</span>
+                        <span className="w-12 shrink-0 text-[12px] text-[#666] dark:text-[#909090]">{"{{" + (i + 1) + "}}"}</span>
                         <Input
                           value={ex}
                           onChange={(e) => {
@@ -226,8 +226,8 @@ function CreateTemplateModal({
 
                 {/* Rodapé */}
                 <div>
-                  <label className="mb-1 block text-[12px] font-semibold text-[#090909]">
-                    Rodapé <span className="font-normal text-[#999]">(opcional)</span>
+                  <label className="mb-1 block text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">
+                    Rodapé <span className="font-normal text-[#999] dark:text-[#686868]">(opcional)</span>
                   </label>
                   <Input
                     value={footer}
@@ -240,25 +240,25 @@ function CreateTemplateModal({
 
               {/* Preview */}
               <div className="w-52 shrink-0">
-                <p className="mb-2 text-[12px] font-semibold text-[#090909]">Preview</p>
-                <div className="rounded-xl border border-[#e5e5e5] bg-[#f0f0f0] p-3">
-                  <div className="rounded-lg bg-white p-3 shadow-sm">
+                <p className="mb-2 text-[12px] font-semibold text-[#090909] dark:text-[#e8e8e8]">Preview</p>
+                <div className="rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f0f0f0] dark:bg-[#252525] p-3">
+                  <div className="rounded-lg bg-white dark:bg-[#1a1a1a] p-3 shadow-sm">
                     {header.trim() && (
-                      <p className="mb-1.5 text-[13px] font-semibold text-[#090909]">{header}</p>
+                      <p className="mb-1.5 text-[13px] font-semibold text-[#090909] dark:text-[#e8e8e8]">{header}</p>
                     )}
-                    <p className="whitespace-pre-wrap text-[13px] text-[#090909]">{preview() || "Corpo do template…"}</p>
+                    <p className="whitespace-pre-wrap text-[13px] text-[#090909] dark:text-[#e8e8e8]">{preview() || "Corpo do template…"}</p>
                     {footer.trim() && (
-                      <p className="mt-1.5 text-[11px] text-[#999]">{footer}</p>
+                      <p className="mt-1.5 text-[11px] text-[#999] dark:text-[#686868]">{footer}</p>
                     )}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="shrink-0 border-t border-[#e5e5e5] px-6 py-4">
+            <div className="shrink-0 border-t border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
               {error && <p className="mb-3 text-[12px] text-red-500">{error}</p>}
               <div className="flex items-center justify-end gap-3">
-                <button onClick={onClose} className="text-sm text-[#666] hover:text-[#090909]">
+                <button onClick={onClose} className="text-sm text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]">
                   Cancelar
                 </button>
                 <Button
@@ -325,26 +325,26 @@ function UseTemplateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-[12px] bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
+      <div className="w-full max-w-md rounded-[12px] bg-white dark:bg-[#1a1a1a] shadow-xl">
+        <div className="flex items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-5 py-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#999]">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">
               Usar template
             </p>
-            <p className="font-semibold text-[#090909]">{template.name}</p>
+            <p className="font-semibold text-[#090909] dark:text-[#e8e8e8]">{template.name}</p>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 text-[#666] hover:bg-[#f0f0f0]">
+          <button onClick={onClose} className="rounded-md p-1.5 text-[#666] dark:text-[#909090] hover:bg-[#f0f0f0] dark:hover:bg-[#252525]">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="space-y-3 px-5 py-4">
-          <div className="rounded-lg bg-[#f8f8f8] px-3.5 py-3">
-            <p className="text-sm text-[#090909]">{fillTemplate(body, vars) || "—"}</p>
+          <div className="rounded-lg bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3.5 py-3">
+            <p className="text-sm text-[#090909] dark:text-[#e8e8e8]">{fillTemplate(body, vars) || "—"}</p>
           </div>
 
           <div>
-            <label className="mb-1 block text-[12px] text-[#666]">Nome do contato</label>
+            <label className="mb-1 block text-[12px] text-[#666] dark:text-[#909090]">Nome do contato</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -354,7 +354,7 @@ function UseTemplateModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-[12px] text-[#666]">
+            <label className="mb-1 block text-[12px] text-[#666] dark:text-[#909090]">
               WhatsApp (com código do país e DDD)
             </label>
             <Input
@@ -367,7 +367,7 @@ function UseTemplateModal({
 
           {vars.map((v, i) => (
             <div key={i}>
-              <label className="mb-1 block text-[12px] text-[#666]">Variável {i + 1}</label>
+              <label className="mb-1 block text-[12px] text-[#666] dark:text-[#909090]">Variável {i + 1}</label>
               <Input
                 value={v}
                 onChange={(e) => {
@@ -409,11 +409,11 @@ function TemplateCard({ template, onUse }: { template: any; onUse?: () => void }
   const body = getBodyText(template);
 
   return (
-    <div className="flex flex-col rounded-[10px] border border-[#e5e5e5] bg-white p-4">
+    <div className="flex flex-col rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-4">
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate font-medium text-[#090909]">{template.name}</p>
-          <p className="text-[12px] text-[#999]">
+          <p className="truncate font-medium text-[#090909] dark:text-[#e8e8e8]">{template.name}</p>
+          <p className="text-[12px] text-[#999] dark:text-[#686868]">
             {template.category} · {template.language}
           </p>
         </div>
@@ -426,7 +426,7 @@ function TemplateCard({ template, onUse }: { template: any; onUse?: () => void }
       </div>
 
       {body && (
-        <p className="mb-3 flex-1 line-clamp-3 text-sm text-[#555]">{body}</p>
+        <p className="mb-3 flex-1 line-clamp-3 text-sm text-[#555] dark:text-[#a0a0a0]">{body}</p>
       )}
 
       {onUse && (
@@ -467,7 +467,7 @@ function TemplatesPage() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-[22px] font-bold text-[#090909]">Templates</h1>
+        <h1 className="text-[22px] font-bold text-[#090909] dark:text-[#e8e8e8]">Templates</h1>
         <button
           onClick={() => setCreateModal(true)}
           className="flex items-center gap-1.5 rounded-lg bg-[#090909] px-3.5 py-2 text-sm font-medium text-white hover:bg-[#090909]/90"
@@ -479,18 +479,18 @@ function TemplatesPage() {
 
       {loading ? (
         <div className="flex justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c0c0c0]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#c0c0c0] dark:text-[#505050]" />
         </div>
       ) : templates.length === 0 ? (
-        <div className="flex flex-col items-center py-24 text-[#999]">
-          <LayoutTemplate className="mb-3 h-12 w-12 text-[#c0c0c0]" />
+        <div className="flex flex-col items-center py-24 text-[#999] dark:text-[#686868]">
+          <LayoutTemplate className="mb-3 h-12 w-12 text-[#c0c0c0] dark:text-[#505050]" />
           <p>Nenhum template encontrado.</p>
         </div>
       ) : (
         <div className="space-y-8">
           {approved.length > 0 && (
             <section>
-              <h2 className="mb-3 text-sm font-semibold text-[#090909]">Aprovados</h2>
+              <h2 className="mb-3 text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">Aprovados</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {approved.map((t) => (
                   <TemplateCard key={t.id ?? t.name} template={t} onUse={() => setUseModal(t)} />
@@ -501,7 +501,7 @@ function TemplatesPage() {
 
           {others.length > 0 && (
             <section>
-              <h2 className="mb-3 text-sm font-semibold text-[#090909]">Outros</h2>
+              <h2 className="mb-3 text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">Outros</h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {others.map((t) => (
                   <TemplateCard key={t.id ?? t.name} template={t} />

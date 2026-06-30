@@ -1,9 +1,10 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Bell, ChevronDown } from "lucide-react";
+import { Bell, ChevronDown, Moon, Sun } from "lucide-react";
 import { BerryLogo } from "./BerryLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { initialsOf, cn } from "@/lib/utils";
+import { useTheme } from "@/lib/theme";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ const ALL_NAV_ITEMS = [
 export function AppHeader() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { theme, toggleTheme } = useTheme();
   const [agent, setAgent] = useState<{ name: string; status: AgentStatus; role: string } | null>(null);
 
   useEffect(() => {
@@ -98,6 +100,13 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={toggleTheme}
+          className="rounded-md p-2 text-white/80 hover:bg-white/5 hover:text-white"
+          title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
         <button className="rounded-md p-2 text-white/80 hover:bg-white/5 hover:text-white">
           <Bell className="h-4 w-4" />
         </button>

@@ -45,17 +45,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-[#1a1a1a]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#00e186] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-[#1a1a1a]">
       <AppHeader />
       {needsSetup && pathname !== "/configuracoes" && (
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] bg-[#fff8e1] px-6 py-2.5 text-sm text-[#090909]">
+        <div className="flex items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#fff8e1] dark:bg-[#2a1800] px-6 py-2.5 text-sm text-[#090909] dark:text-[#e8e8e8]">
           <span>Configure as integrações para começar.</span>
           <Button asChild size="sm" className="bg-[#090909] text-white hover:bg-[#090909]/90">
             <Link to="/configuracoes">

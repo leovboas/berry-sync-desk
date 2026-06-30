@@ -55,15 +55,15 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white px-4">
+    <div className="flex min-h-screen items-center justify-center bg-white dark:bg-[#1a1a1a] px-4">
       <div className="w-full max-w-sm">
         <div className="mb-10 flex justify-center">
           <BerryLogo height={36} />
         </div>
-        <h1 className="mb-1 text-center text-[22px] font-bold text-[#090909]">
+        <h1 className="mb-1 text-center text-[22px] font-bold text-[#090909] dark:text-[#e8e8e8]">
           {mode === "signin" ? "Entrar" : "Criar conta"}
         </h1>
-        <p className="mb-8 text-center text-sm text-[#666]">
+        <p className="mb-8 text-center text-sm text-[#666] dark:text-[#909090]">
           Central de atendimento Berry Consultoria
         </p>
 
@@ -105,12 +105,12 @@ function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-[#666]">
+        <p className="mt-6 text-center text-sm text-[#666] dark:text-[#909090]">
           {mode === "signin" ? "Ainda não tem conta? " : "Já tem conta? "}
           <button
             type="button"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="font-semibold text-[#090909] underline-offset-4 hover:underline"
+            className="font-semibold text-[#090909] dark:text-[#e8e8e8] underline-offset-4 hover:underline"
           >
             {mode === "signin" ? "Cadastre-se" : "Entrar"}
           </button>

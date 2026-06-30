@@ -60,9 +60,9 @@ function ConfiguracoesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-6">
-      <h1 className="mb-6 text-[22px] font-bold text-[#090909]">Configurações</h1>
+      <h1 className="mb-6 text-[22px] font-bold text-[#090909] dark:text-[#e8e8e8]">Configurações</h1>
 
-      <div className="mb-6 flex gap-6 border-b border-[#e5e5e5]">
+      <div className="mb-6 flex gap-6 border-b border-[#e5e5e5] dark:border-[#2a2a2a]">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -70,8 +70,8 @@ function ConfiguracoesPage() {
             className={cn(
               "relative py-3 text-sm transition-colors",
               tab === t.key
-                ? "font-semibold text-[#090909]"
-                : "text-[#666] hover:text-[#090909]"
+                ? "font-semibold text-[#090909] dark:text-[#e8e8e8]"
+                : "text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
             )}
           >
             {t.label}
@@ -131,7 +131,7 @@ function AccountTab() {
   }
 
   return (
-    <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-6">
+    <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-6">
       <div className="mb-6 flex items-center gap-4">
         <div
           className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold"
@@ -140,11 +140,11 @@ function AccountTab() {
           {initialsOf(name || email)}
         </div>
         <div>
-          <div className="text-sm font-semibold text-[#090909]">{name || email}</div>
+          <div className="text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">{name || email}</div>
           <span
             className={cn(
               "mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold",
-              role === "admin" ? "bg-[#090909] text-white" : "bg-[#f0f0f0] text-[#666]"
+              role === "admin" ? "bg-[#090909] text-white" : "bg-[#f0f0f0] dark:bg-[#252525] text-[#666] dark:text-[#909090]"
             )}
           >
             {role === "admin" ? "Admin" : "Agente"}
@@ -168,7 +168,7 @@ function AccountTab() {
             placeholder="Mesmo e-mail do seu usuário na HubSpot (se diferente do login)"
             type="email"
           />
-          <p className="text-xs text-[#999]">
+          <p className="text-xs text-[#999] dark:text-[#686868]">
             Usado para encontrar os contatos atribuídos a você. Deixe em branco para usar o e-mail de login.
           </p>
         </div>
@@ -278,11 +278,11 @@ function IntegrationsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-6">
+      <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-[#090909]">Chatwoot</h3>
-            <p className="text-xs text-[#666]">Motor de atendimento WhatsApp self-hosted.</p>
+            <h3 className="text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">Chatwoot</h3>
+            <p className="text-xs text-[#666] dark:text-[#909090]">Motor de atendimento WhatsApp self-hosted.</p>
           </div>
           <Button size="sm" variant="outline" onClick={testChatwoot}>
             Testar conexão
@@ -297,11 +297,11 @@ function IntegrationsTab() {
         </div>
       </div>
 
-      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-6">
+      <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-[#090909]">HubSpot</h3>
-            <p className="text-xs text-[#666]">CRM para contatos, deals e notas.</p>
+            <h3 className="text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">HubSpot</h3>
+            <p className="text-xs text-[#666] dark:text-[#909090]">CRM para contatos, deals e notas.</p>
           </div>
           <Button size="sm" variant="outline" onClick={testHubspot}>
             Testar conexão
@@ -409,19 +409,19 @@ function FieldsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-6">
+      <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-[#090909]">Campos do Lead</h3>
-            <p className="text-xs text-[#666]">
+            <h3 className="text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">Campos do Lead</h3>
+            <p className="text-xs text-[#666] dark:text-[#909090]">
               Selecione quais propriedades do HubSpot aparecem no painel lateral da conversa.
             </p>
           </div>
-          <span className="text-xs text-[#666]">{selected.size} selecionados</span>
+          <span className="text-xs text-[#666] dark:text-[#909090]">{selected.size} selecionados</span>
         </div>
 
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999] dark:text-[#686868]" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -432,7 +432,7 @@ function FieldsTab() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#999] dark:text-[#686868]" />
           </div>
         ) : error ? (
           <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">{error}</div>
@@ -440,14 +440,14 @@ function FieldsTab() {
           <div className="max-h-[500px] space-y-5 overflow-y-auto pr-1">
             {Object.entries(groups).map(([group, props]) => (
               <div key={group}>
-                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">
+                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">
                   {formatGroupName(group)}
                 </div>
-                <div className="divide-y divide-[#f0f0f0]">
+                <div className="divide-y divide-[#f0f0f0] dark:divide-[#2a2a2a]">
                   {props.map((p) => (
                     <label
                       key={p.name}
-                      className="flex cursor-pointer items-center gap-3 py-2 px-1 hover:bg-[#f8f8f8] rounded-lg"
+                      className="flex cursor-pointer items-center gap-3 py-2 px-1 hover:bg-[#f8f8f8] dark:hover:bg-[#1e1e1e] rounded-lg"
                     >
                       <input
                         type="checkbox"
@@ -456,8 +456,8 @@ function FieldsTab() {
                         className="h-4 w-4 shrink-0 accent-[#090909]"
                       />
                       <div className="min-w-0">
-                        <div className="text-sm text-[#090909]">{p.label}</div>
-                        <div className="text-[11px] text-[#999]">{p.name}</div>
+                        <div className="text-sm text-[#090909] dark:text-[#e8e8e8]">{p.label}</div>
+                        <div className="text-[11px] text-[#999] dark:text-[#686868]">{p.name}</div>
                       </div>
                     </label>
                   ))}
@@ -524,12 +524,12 @@ function AgentsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[10px] border border-[#e5e5e5] bg-white">
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
+      <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
+        <div className="flex items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-5 py-4">
           <div>
-            <h3 className="text-sm font-semibold text-[#090909]">Agentes</h3>
+            <h3 className="text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">Agentes</h3>
             {!isAdmin && !loading && (
-              <p className="mt-0.5 text-xs text-[#999]">Apenas admins podem gerenciar agentes.</p>
+              <p className="mt-0.5 text-xs text-[#999] dark:text-[#686868]">Apenas admins podem gerenciar agentes.</p>
             )}
           </div>
           {isAdmin && (
@@ -545,28 +545,28 @@ function AgentsTab() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#999] dark:text-[#686868]" />
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-[#e5e5e5] bg-[#f8f8f8]">
+            <thead className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e]">
               <tr>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">Nome</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">E-mail</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">Perfil</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">Status</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">Nome</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">E-mail</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">Perfil</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">Status</th>
                 {isAdmin && <th className="w-10 px-2 py-3" />}
               </tr>
             </thead>
             <tbody>
               {agents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#999]">
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#999] dark:text-[#686868]">
                     Nenhum agente cadastrado.
                   </td>
                 </tr>
               ) : agents.map((a) => (
-                <tr key={a.id} className="border-b border-[#e5e5e5] last:border-0">
+                <tr key={a.id} className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] last:border-0">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
                       <div
@@ -575,25 +575,25 @@ function AgentsTab() {
                       >
                         {initialsOf(a.name || a.email)}
                       </div>
-                      <span className="font-medium text-[#090909]">
+                      <span className="font-medium text-[#090909] dark:text-[#e8e8e8]">
                         {a.name || "—"}
                         {a.id === myId && (
-                          <span className="ml-1.5 text-[10px] font-normal text-[#999]">(você)</span>
+                          <span className="ml-1.5 text-[10px] font-normal text-[#999] dark:text-[#686868]">(você)</span>
                         )}
                       </span>
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-[#666]">{a.email}</td>
+                  <td className="px-5 py-3 text-[#666] dark:text-[#909090]">{a.email}</td>
                   <td className="px-5 py-3">
                     <span className={cn(
                       "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                      a.role === "admin" ? "bg-[#090909] text-white" : "bg-[#f0f0f0] text-[#666]"
+                      a.role === "admin" ? "bg-[#090909] text-white" : "bg-[#f0f0f0] dark:bg-[#252525] text-[#666] dark:text-[#909090]"
                     )}>
                       {a.role === "admin" ? "Admin" : "Agente"}
                     </span>
                   </td>
                   <td className="px-5 py-3">
-                    <span className="flex items-center gap-1.5 text-xs text-[#090909]">
+                    <span className="flex items-center gap-1.5 text-xs text-[#090909] dark:text-[#e8e8e8]">
                       <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLOR[a.status] ?? "#d1d5db" }} />
                       {a.status ?? "offline"}
                     </span>
@@ -602,21 +602,21 @@ function AgentsTab() {
                     <td className="relative px-2 py-3">
                       <button
                         onMouseDown={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === a.id ? null : a.id); }}
-                        className="flex h-7 w-7 items-center justify-center rounded-md text-[#999] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-[#999] dark:text-[#686868] hover:bg-[#f0f0f0] dark:hover:bg-[#252525] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </button>
                       {menuOpenId === a.id && (
-                        <div className="absolute right-2 top-10 z-20 w-44 rounded-[10px] border border-[#e5e5e5] bg-white py-1 shadow-lg">
+                        <div className="absolute right-2 top-10 z-20 w-44 rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] py-1 shadow-lg">
                           <button
                             onMouseDown={(e) => { e.stopPropagation(); setEditTarget(a); setMenuOpenId(null); }}
-                            className="w-full px-4 py-2 text-left text-sm text-[#090909] hover:bg-[#f8f8f8]"
+                            className="w-full px-4 py-2 text-left text-sm text-[#090909] dark:text-[#e8e8e8] hover:bg-[#f8f8f8] dark:hover:bg-[#1e1e1e]"
                           >
                             Editar
                           </button>
                           <button
                             onMouseDown={(e) => { e.stopPropagation(); setResetTarget(a); setMenuOpenId(null); }}
-                            className="w-full px-4 py-2 text-left text-sm text-[#090909] hover:bg-[#f8f8f8]"
+                            className="w-full px-4 py-2 text-left text-sm text-[#090909] dark:text-[#e8e8e8] hover:bg-[#f8f8f8] dark:hover:bg-[#1e1e1e]"
                           >
                             Redefinir senha
                           </button>
@@ -716,30 +716,30 @@ function ResetPasswordModal({ agent, onClose }: { agent: Agent; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={onClose}>
-      <div className="w-full max-w-md rounded-[14px] bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-[14px] bg-white dark:bg-[#1a1a1a] p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
         {tempPassword ? (
           <>
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#e8f5e9]">
               <Check className="h-5 w-5 text-[#2e7d32]" />
             </div>
-            <h3 className="mb-1 text-base font-semibold text-[#090909]">Senha redefinida!</h3>
-            <p className="mb-5 text-sm text-[#666]">
+            <h3 className="mb-1 text-base font-semibold text-[#090909] dark:text-[#e8e8e8]">Senha redefinida!</h3>
+            <p className="mb-5 text-sm text-[#666] dark:text-[#909090]">
               Compartilhe as novas credenciais com <strong>{agent.name || agent.email}</strong>. O usuário já pode acessar.
             </p>
-            <div className="space-y-3 rounded-[10px] border border-[#e5e5e5] bg-[#f8f8f8] p-4">
+            <div className="space-y-3 rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] p-4">
               <div>
-                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#999]">E-mail</p>
-                <p className="text-sm text-[#090909]">{agent.email}</p>
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">E-mail</p>
+                <p className="text-sm text-[#090909] dark:text-[#e8e8e8]">{agent.email}</p>
               </div>
               <div>
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">Nova senha temporária</p>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">Nova senha temporária</p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 rounded-md border border-[#e5e5e5] bg-white px-3 py-2 font-mono text-sm font-bold text-[#090909] shadow-sm">
+                  <code className="flex-1 rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-3 py-2 font-mono text-sm font-bold text-[#090909] dark:text-[#e8e8e8] shadow-sm">
                     {tempPassword}
                   </code>
                   <button
                     onClick={copyPassword}
-                    className="flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e5] bg-white px-3 py-2 text-xs font-medium text-[#090909] hover:bg-[#f0f0f0]"
+                    className="flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-3 py-2 text-xs font-medium text-[#090909] dark:text-[#e8e8e8] hover:bg-[#f0f0f0] dark:hover:bg-[#252525]"
                   >
                     {copied
                       ? <><Check className="h-3.5 w-3.5 text-green-600" /> Copiado</>
@@ -754,8 +754,8 @@ function ResetPasswordModal({ agent, onClose }: { agent: Agent; onClose: () => v
           </>
         ) : (
           <>
-            <h3 className="mb-1 text-base font-semibold text-[#090909]">Redefinir senha</h3>
-            <p className="mb-5 text-sm text-[#666]">
+            <h3 className="mb-1 text-base font-semibold text-[#090909] dark:text-[#e8e8e8]">Redefinir senha</h3>
+            <p className="mb-5 text-sm text-[#666] dark:text-[#909090]">
               Uma nova senha temporária será gerada para{" "}
               <strong>{agent.name || agent.email}</strong>. O usuário também será ativado caso esteja inativo.
             </p>
@@ -829,29 +829,29 @@ function AgentModal({
   if (done) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div className="w-full max-w-md rounded-[14px] bg-white p-6 shadow-2xl">
+        <div className="w-full max-w-md rounded-[14px] bg-white dark:bg-[#1a1a1a] p-6 shadow-2xl">
           <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#e8f5e9]">
             <Check className="h-5 w-5 text-[#2e7d32]" />
           </div>
-          <h3 className="mb-1 text-base font-semibold text-[#090909]">Agente criado!</h3>
-          <p className="mb-5 text-sm text-[#666]">
+          <h3 className="mb-1 text-base font-semibold text-[#090909] dark:text-[#e8e8e8]">Agente criado!</h3>
+          <p className="mb-5 text-sm text-[#666] dark:text-[#909090]">
             Compartilhe as credenciais abaixo com <strong>{name.trim()}</strong>. Ele pode trocar a senha após o primeiro acesso.
           </p>
 
-          <div className="space-y-3 rounded-[10px] border border-[#e5e5e5] bg-[#f8f8f8] p-4">
+          <div className="space-y-3 rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] p-4">
             <div>
-              <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#999]">E-mail</p>
-              <p className="text-sm text-[#090909]">{email.trim()}</p>
+              <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">E-mail</p>
+              <p className="text-sm text-[#090909] dark:text-[#e8e8e8]">{email.trim()}</p>
             </div>
             <div>
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">Senha temporária</p>
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">Senha temporária</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded-md bg-white px-3 py-2 font-mono text-sm font-bold text-[#090909] shadow-sm border border-[#e5e5e5]">
+                <code className="flex-1 rounded-md bg-white dark:bg-[#1a1a1a] px-3 py-2 font-mono text-sm font-bold text-[#090909] dark:text-[#e8e8e8] shadow-sm border border-[#e5e5e5] dark:border-[#2a2a2a]">
                   {done.tempPassword}
                 </code>
                 <button
                   onClick={copyPassword}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e5] bg-white px-3 py-2 text-xs font-medium text-[#090909] hover:bg-[#f0f0f0]"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-3 py-2 text-xs font-medium text-[#090909] dark:text-[#e8e8e8] hover:bg-[#f0f0f0] dark:hover:bg-[#252525]"
                 >
                   {copied
                     ? <><Check className="h-3.5 w-3.5 text-green-600" /> Copiado</>
@@ -871,8 +871,8 @@ function AgentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={onClose}>
-      <div className="w-full max-w-md rounded-[14px] bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
-        <h3 className="mb-5 text-base font-semibold text-[#090909]">{title}</h3>
+      <div className="w-full max-w-md rounded-[14px] bg-white dark:bg-[#1a1a1a] p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+        <h3 className="mb-5 text-base font-semibold text-[#090909] dark:text-[#e8e8e8]">{title}</h3>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label className="label-uppercase">Nome</Label>
@@ -881,7 +881,7 @@ function AgentModal({
           <div className="space-y-1.5">
             <Label className="label-uppercase">E-mail</Label>
             {emailReadOnly ? (
-              <div className="flex h-10 items-center rounded-md border border-[#e5e5e5] bg-[#f8f8f8] px-3 text-sm text-[#666]">
+              <div className="flex h-10 items-center rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3 text-sm text-[#666] dark:text-[#909090]">
                 {email}
               </div>
             ) : (
@@ -893,7 +893,7 @@ function AgentModal({
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as "admin" | "agent")}
-              className="h-10 w-full rounded-md border border-[#e5e5e5] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+              className="h-10 w-full rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
             >
               <option value="agent">Agente — acesso padrão ao atendimento</option>
               <option value="admin">Admin — gerencia agentes e configurações</option>
@@ -939,9 +939,9 @@ function ConfirmDeleteModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={onClose}>
-      <div className="w-full max-w-sm rounded-[14px] bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
-        <h3 className="mb-2 text-base font-semibold text-[#090909]">Remover agente</h3>
-        <p className="text-sm text-[#666]">
+      <div className="w-full max-w-sm rounded-[14px] bg-white dark:bg-[#1a1a1a] p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+        <h3 className="mb-2 text-base font-semibold text-[#090909] dark:text-[#e8e8e8]">Remover agente</h3>
+        <p className="text-sm text-[#666] dark:text-[#909090]">
           Tem certeza que deseja remover <strong>{agent.name || agent.email}</strong>?
           O acesso será revogado imediatamente.
         </p>

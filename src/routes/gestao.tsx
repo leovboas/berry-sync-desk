@@ -133,22 +133,22 @@ function StatCard({
       className={cn(
         "flex w-full flex-col items-start gap-1 rounded-[10px] border px-4 py-3 text-left transition-all",
         onClick && "hover:shadow-sm",
-        active   ? "border-[#090909] bg-[#090909]"
+        active   ? "border-[#090909] dark:border-[#555] bg-[#090909]"
         : isAlert ? "border-red-200 bg-red-50"
-        :           "border-[#e5e5e5] bg-white",
+        :           "border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]",
         !onClick && "cursor-default"
       )}
     >
       <div className="flex items-center gap-1.5">
         <Icon className={cn("h-3.5 w-3.5",
-          active ? "text-white/70" : isAlert ? "text-red-500" : "text-[#999]")} />
+          active ? "text-white/70" : isAlert ? "text-red-500" : "text-[#999] dark:text-[#686868]")} />
         <span className={cn("text-[10px] font-semibold uppercase tracking-wider",
-          active ? "text-white/70" : isAlert ? "text-red-500" : "text-[#999]")}>
+          active ? "text-white/70" : isAlert ? "text-red-500" : "text-[#999] dark:text-[#686868]")}>
           {label}
         </span>
       </div>
       <span className={cn("text-[28px] font-bold leading-none",
-        active ? "text-white" : isAlert ? "text-red-600" : "text-[#090909]")}>
+        active ? "text-white" : isAlert ? "text-red-600" : "text-[#090909] dark:text-[#e8e8e8]")}>
         {value}
       </span>
     </button>
@@ -174,7 +174,7 @@ function ConvCard({ conv, onClick }: { conv: any; onClick: () => void }) {
         "w-full rounded-[8px] border p-3 text-left transition-all hover:shadow-sm",
         sla     ? "border-red-200 bg-red-50 hover:border-red-300"
         : waiting ? "border-amber-200 bg-amber-50 hover:border-amber-300"
-        :           "border-[#e5e5e5] bg-white hover:border-[#090909]"
+        :           "border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] hover:border-[#090909] dark:hover:border-[#555]"
       )}
     >
       {/* Top row: priority dot + name + badges */}
@@ -192,7 +192,7 @@ function ConvCard({ conv, onClick }: { conv: any; onClick: () => void }) {
             >
               {initialsOf(name)}
             </div>
-            <span className="truncate text-[13px] font-medium text-[#090909]">{name}</span>
+            <span className="truncate text-[13px] font-medium text-[#090909] dark:text-[#e8e8e8]">{name}</span>
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -212,7 +212,7 @@ function ConvCard({ conv, onClick }: { conv: any; onClick: () => void }) {
 
       {/* Middle: time + who sent last */}
       <div className="mt-2 flex items-center justify-between gap-2">
-        <span className="text-[11px] text-[#999]">
+        <span className="text-[11px] text-[#999] dark:text-[#686868]">
           {elapsed ? `${fmtWait(elapsed)} atrás` : "—"}
         </span>
         {waiting ? (
@@ -221,7 +221,7 @@ function ConvCard({ conv, onClick }: { conv: any; onClick: () => void }) {
             Lead aguardando
           </span>
         ) : (
-          <span className="text-[10px] text-[#bbb]">SDR respondeu</span>
+          <span className="text-[10px] text-[#bbb] dark:text-[#555] dark:dark:text-[#a0a0a0]">SDR respondeu</span>
         )}
       </div>
 
@@ -289,7 +289,7 @@ function AgentColumn({
               )}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-[13px] font-semibold text-[#090909]">{name}</p>
+              <p className="truncate text-[13px] font-semibold text-[#090909] dark:text-[#e8e8e8]">{name}</p>
               {!isUnassigned && level !== "normal" && (
                 <p className="text-[10px] font-medium" style={{ color: style.labelColor }}>
                   {style.label}
@@ -325,9 +325,9 @@ function AgentColumn({
       </div>
 
       {/* Conv cards */}
-      <div className="flex flex-col gap-2 overflow-y-auto bg-white p-3">
+      <div className="flex flex-col gap-2 overflow-y-auto bg-white dark:bg-[#1a1a1a] p-3">
         {sorted.length === 0 ? (
-          <p className="py-6 text-center text-[11px] text-[#bbb]">Sem conversas</p>
+          <p className="py-6 text-center text-[11px] text-[#bbb] dark:text-[#555] dark:dark:text-[#a0a0a0]">Sem conversas</p>
         ) : (
           sorted.map(conv => (
             <ConvCard key={conv.id} conv={conv} onClick={() => onConvClick(conv)} />
@@ -353,16 +353,16 @@ function FilterChip({
         "flex h-7 items-center gap-1.5 rounded-full border px-3 text-[12px] font-medium transition-all",
         active
           ? hasAlert ? "border-red-500 bg-red-500 text-white"
-                     : "border-[#090909] bg-[#090909] text-white"
+                     : "border-[#090909] dark:border-[#555] bg-[#090909] text-white"
           : hasAlert ? "border-red-200 bg-red-50 text-red-600 hover:border-red-400"
-                     : "border-[#e5e5e5] bg-white text-[#090909] hover:border-[#090909]"
+                     : "border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-[#090909] dark:text-[#e8e8e8] hover:border-[#090909] dark:hover:border-[#555]"
       )}
     >
       {label}
       {count !== undefined && count > 0 && (
         <span className={cn(
           "rounded-full px-1.5 text-[10px] font-bold",
-          active ? "bg-white/25 text-white" : hasAlert ? "bg-red-100 text-red-700" : "bg-[#f0f0f0] text-[#666]"
+          active ? "bg-white/25 text-white" : hasAlert ? "bg-red-100 text-red-700" : "bg-[#f0f0f0] dark:bg-[#252525] text-[#666] dark:text-[#909090]"
         )}>
           {count}
         </span>
@@ -490,11 +490,11 @@ function GestaoPage() {
     <div className="flex h-full flex-col overflow-hidden">
 
       {/* ── Header ── */}
-      <div className="flex shrink-0 items-center justify-between border-b border-[#e5e5e5] px-6 py-4">
+      <div className="flex shrink-0 items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
         <div>
-          <h1 className="text-[18px] font-bold text-[#090909]">Visão do Gestor</h1>
+          <h1 className="text-[18px] font-bold text-[#090909] dark:text-[#e8e8e8]">Visão do Gestor</h1>
           {lastUpdated && (
-            <p className="mt-0.5 text-[12px] text-[#999]">
+            <p className="mt-0.5 text-[12px] text-[#999] dark:text-[#686868]">
               Atualizado às {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
             </p>
           )}
@@ -502,7 +502,7 @@ function GestaoPage() {
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-2 rounded-lg border border-[#e5e5e5] px-3 py-1.5 text-sm text-[#090909] hover:bg-[#f5f5f5] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 py-1.5 text-sm text-[#090909] dark:text-[#e8e8e8] hover:bg-[#f5f5f5] dark:hover:bg-[#1e1e1e] disabled:opacity-50"
         >
           <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
           Atualizar
@@ -510,7 +510,7 @@ function GestaoPage() {
       </div>
 
       {/* ── Stats bar ── */}
-      <div className="shrink-0 border-b border-[#e5e5e5] px-6 py-3">
+      <div className="shrink-0 border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-3">
         <div className="grid grid-cols-5 gap-3">
           <StatCard
             label="Novos hoje"
@@ -551,9 +551,9 @@ function GestaoPage() {
       </div>
 
       {/* ── Filter bar ── */}
-      <div className="shrink-0 border-b border-[#e5e5e5] px-6 py-2">
+      <div className="shrink-0 border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-[#bbb]">
+          <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-[#bbb] dark:text-[#555] dark:dark:text-[#a0a0a0]">
             <Filter className="h-3 w-3" />
             Filtrar
           </span>
@@ -561,7 +561,7 @@ function GestaoPage() {
           <select
             value={filterSDR}
             onChange={e => setFilterSDR(e.target.value)}
-            className="h-7 rounded-full border border-[#e5e5e5] bg-white px-3 text-[12px] text-[#090909] focus:outline-none focus:ring-1 focus:ring-[#090909] appearance-none cursor-pointer"
+            className="h-7 rounded-full border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] px-3 text-[12px] text-[#090909] dark:text-[#e8e8e8] focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888] appearance-none cursor-pointer"
           >
             <option value="">Todos os SDRs</option>
             <option value="__unassigned__">Sem responsável</option>
@@ -594,7 +594,7 @@ function GestaoPage() {
           {activeFilterCount > 0 && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1 text-[11px] text-[#999] hover:text-[#090909]"
+              className="flex items-center gap-1 text-[11px] text-[#999] dark:text-[#686868] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
             >
               <X className="h-3 w-3" />
               Limpar
@@ -606,18 +606,18 @@ function GestaoPage() {
       {/* ── Kanban ── */}
       {loading ? (
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#c0c0c0]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#c0c0c0] dark:text-[#505050]" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
           <Users className="h-12 w-12 text-[#e0e0e0]" />
-          <p className="text-sm text-[#999]">
+          <p className="text-sm text-[#999] dark:text-[#686868]">
             {activeFilterCount > 0
               ? "Nenhuma conversa com os filtros selecionados."
               : "Nenhuma conversa em aberto no momento."}
           </p>
           {activeFilterCount > 0 && (
-            <button onClick={clearFilters} className="text-sm text-[#090909] underline">
+            <button onClick={clearFilters} className="text-sm text-[#090909] dark:text-[#e8e8e8] underline">
               Limpar filtros
             </button>
           )}

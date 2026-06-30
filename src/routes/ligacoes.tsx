@@ -60,16 +60,16 @@ function LigacoesPage() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-[22px] font-bold text-[#090909]">Ligações</h1>
+        <h1 className="text-[22px] font-bold text-[#090909] dark:text-[#e8e8e8]">Ligações</h1>
         <Button variant="outline" size="sm">
           <Filter className="mr-2 h-3.5 w-3.5" />
           Filtros
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-[10px] border border-[#e5e5e5] bg-white">
+      <div className="overflow-hidden rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
         <table className="w-full text-sm">
-          <thead className="border-b border-[#e5e5e5] bg-[#f8f8f8]">
+          <thead className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e]">
             <tr className="text-left">
               <Th>Data/hora</Th>
               <Th>Contato</Th>
@@ -82,7 +82,7 @@ function LigacoesPage() {
           <tbody>
             {calls === null ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i} className="border-b border-[#e5e5e5] last:border-0">
+                <tr key={i} className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] last:border-0">
                   {Array.from({ length: 6 }).map((_, j) => (
                     <td key={j} className="px-4 py-4">
                       <Skeleton className="h-3 w-full" />
@@ -92,8 +92,8 @@ function LigacoesPage() {
               ))
             ) : calls.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-16 text-center text-[#666]">
-                  <PhoneCall className="mx-auto mb-3 h-10 w-10 text-[#c0c0c0]" />
+                <td colSpan={6} className="px-4 py-16 text-center text-[#666] dark:text-[#909090]">
+                  <PhoneCall className="mx-auto mb-3 h-10 w-10 text-[#c0c0c0] dark:text-[#505050]" />
                   Nenhuma ligação registrada. Quando o CloudTalk enviar webhooks, elas
                   aparecerão aqui.
                 </td>
@@ -103,9 +103,9 @@ function LigacoesPage() {
                 <tr
                   key={c.id}
                   onClick={() => setSelected(c)}
-                  className="cursor-pointer border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa]"
+                  className="cursor-pointer border-b border-[#e5e5e5] dark:border-[#2a2a2a] last:border-0 hover:bg-[#fafafa] dark:hover:bg-[#1e1e1e]"
                 >
-                  <td className="px-4 py-3 text-[#090909]">
+                  <td className="px-4 py-3 text-[#090909] dark:text-[#e8e8e8]">
                     {new Date(c.created_at).toLocaleString("pt-BR")}
                   </td>
                   <td className="px-4 py-3">
@@ -117,20 +117,20 @@ function LigacoesPage() {
                         {initialsOf(c.contact_name ?? "?")}
                       </div>
                       <div>
-                        <div className="font-medium text-[#090909]">
+                        <div className="font-medium text-[#090909] dark:text-[#e8e8e8]">
                           {c.contact_name ?? "Desconhecido"}
                         </div>
-                        <div className="text-xs text-[#666]">{c.contact_phone}</div>
+                        <div className="text-xs text-[#666] dark:text-[#909090]">{c.contact_phone}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#666]">—</td>
-                  <td className="px-4 py-3 text-[#090909]">{formatDuration(c.duration_seconds)}</td>
+                  <td className="px-4 py-3 text-[#666] dark:text-[#909090]">—</td>
+                  <td className="px-4 py-3 text-[#090909] dark:text-[#e8e8e8]">{formatDuration(c.duration_seconds)}</td>
                   <td className="px-4 py-3">
                     <CallStatusBadge status={c.status} />
                   </td>
                   <td className="max-w-[260px] px-4 py-3">
-                    <div className="truncate text-[#666]">
+                    <div className="truncate text-[#666] dark:text-[#909090]">
                       {c.ai_summary ?? "Aguardando processamento…"}
                     </div>
                   </td>
@@ -157,10 +157,10 @@ function LigacoesPage() {
                     {initialsOf(selected.contact_name ?? "?")}
                   </div>
                   <div>
-                    <div className="font-semibold text-[#090909]">
+                    <div className="font-semibold text-[#090909] dark:text-[#e8e8e8]">
                       {selected.contact_name}
                     </div>
-                    <div className="text-xs text-[#666]">{selected.contact_phone}</div>
+                    <div className="text-xs text-[#666] dark:text-[#909090]">{selected.contact_phone}</div>
                   </div>
                 </div>
 
@@ -171,7 +171,7 @@ function LigacoesPage() {
 
                 <div>
                   <div className="label-uppercase mb-2">Resumo AI</div>
-                  <div className="rounded-[10px] border border-[#e5e5e5] bg-[#f8f8f8] p-4 text-sm leading-relaxed text-[#090909]">
+                  <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] p-4 text-sm leading-relaxed text-[#090909] dark:text-[#e8e8e8]">
                     {selected.ai_summary ?? "Resumo ainda não gerado."}
                   </div>
                 </div>
@@ -200,7 +200,7 @@ function LigacoesPage() {
 
 function Th({ children }: { children: React.ReactNode }) {
   return (
-    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-[#666]">
+    <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">
       {children}
     </th>
   );
@@ -229,9 +229,9 @@ function CallStatusBadge({ status }: { status: string | null }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-3">
+    <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-3">
       <div className="label-uppercase mb-1">{label}</div>
-      <div className="font-medium text-[#090909]">{value}</div>
+      <div className="font-medium text-[#090909] dark:text-[#e8e8e8]">{value}</div>
     </div>
   );
 }

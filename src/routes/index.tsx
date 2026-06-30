@@ -72,7 +72,7 @@ function AudioPlayer({ src, fromAgent }: { src: string; fromAgent: boolean }) {
 
   return (
     <div className={cn("flex items-center gap-2.5 rounded-2xl px-3 py-2.5 w-56",
-      fromAgent ? "bg-[#1a1a1a]" : "border border-[#e5e5e5] bg-[#f0f0f0]"
+      fromAgent ? "bg-[#1a1a1a]" : "border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f0f0f0] dark:bg-[#252525]"
     )}>
       <audio
         ref={audioRef}
@@ -113,7 +113,7 @@ function AudioPlayer({ src, fromAgent }: { src: string; fromAgent: boolean }) {
           />
         </div>
         <div className={cn("flex justify-between text-[10px]",
-          fromAgent ? "text-white/50" : "text-[#999]"
+          fromAgent ? "text-white/50" : "text-[#999] dark:text-[#686868]"
         )}>
           <span>{formatAudioTime(currentTime)}</span>
           <span>{formatAudioTime(duration)}</span>
@@ -123,7 +123,7 @@ function AudioPlayer({ src, fromAgent }: { src: string; fromAgent: boolean }) {
       <button
         onClick={cycleSpeed}
         className={cn("shrink-0 w-7 text-center text-[11px] font-bold tabular-nums",
-          fromAgent ? "text-white/60 hover:text-white" : "text-[#666] hover:text-[#090909]"
+          fromAgent ? "text-white/60 hover:text-white" : "text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
         )}
       >
         {speed}x
@@ -595,35 +595,35 @@ function AtendimentoPage() {
   return (
     <div className="flex h-[calc(100vh-52px)]">
       {/* Left: conversation list */}
-      <aside className="flex w-[300px] flex-col border-r border-[#e5e5e5]" style={{ background: "#f8f8f8" }}>
-        <div className="border-b border-[#e5e5e5] p-3">
+      <aside className="flex w-[300px] flex-col border-r border-[#e5e5e5] dark:border-[#2a2a2a]" style={{ background: "#f8f8f8" }}>
+        <div className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] p-3">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666]" />
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666] dark:text-[#909090]" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar conversas"
-                className="h-9 bg-white pl-8"
+                className="h-9 bg-white dark:bg-[#1a1a1a] pl-8"
               />
             </div>
             <button
               onClick={openNewConvModal}
               title="Nova conversa"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e5e5] bg-white text-[#666] transition-colors hover:border-[#090909] hover:text-[#090909]"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-[#666] dark:text-[#909090] transition-colors hover:border-[#090909] dark:hover:border-[#555] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
             >
               <UserPlus className="h-4 w-4" />
             </button>
           </div>
         </div>
-        <div className="flex gap-5 border-b border-[#e5e5e5] px-3">
+        <div className="flex gap-5 border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-3">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
                 "relative py-3 text-sm transition-colors",
-                tab === t.key ? "font-semibold text-[#090909]" : "text-[#666] hover:text-[#090909]"
+                tab === t.key ? "font-semibold text-[#090909] dark:text-[#e8e8e8]" : "text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
               )}
             >
               {t.label}
@@ -636,10 +636,10 @@ function AtendimentoPage() {
         <div className="flex-1 overflow-y-auto">
           {loadingConvs ? (
             <div className="flex h-full items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
+              <Loader2 className="h-5 w-5 animate-spin text-[#999] dark:text-[#686868]" />
             </div>
           ) : visible.length === 0 ? (
-            <div className="p-8 text-center text-sm text-[#666]">Sem conversas</div>
+            <div className="p-8 text-center text-sm text-[#666] dark:text-[#909090]">Sem conversas</div>
           ) : (
             visible.map((c) => (
               <ConversationRow
@@ -654,12 +654,12 @@ function AtendimentoPage() {
       </aside>
 
       {/* Center: chat */}
-      <section className="flex flex-1 flex-col bg-white">
+      <section className="flex flex-1 flex-col bg-white dark:bg-[#1a1a1a]">
         {!active ? (
           <EmptyChat />
         ) : (
           <>
-            <header className="flex items-center justify-between border-b border-[#e5e5e5] px-6 py-3">
+            <header className="flex items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-3">
               <div className="flex items-center gap-3">
                 <ContactAvatar
                   name={active.meta?.sender?.name ?? "?"}
@@ -667,10 +667,10 @@ function AtendimentoPage() {
                   text="text-sm"
                 />
                 <div>
-                  <div className="text-sm font-semibold text-[#090909]">
+                  <div className="text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">
                     {active.meta?.sender?.name ?? "Desconhecido"}
                   </div>
-                  <div className="text-xs text-[#666]">{active.meta?.sender?.phone_number ?? ""}</div>
+                  <div className="text-xs text-[#666] dark:text-[#909090]">{active.meta?.sender?.phone_number ?? ""}</div>
                 </div>
                 <StatusBadge status={active.status} />
               </div>
@@ -678,7 +678,7 @@ function AtendimentoPage() {
                 {active.status !== "resolved" && (
                   <Button
                     size="sm"
-                    className="bg-[#00e186] text-[#090909] hover:bg-[#00c875]"
+                    className="bg-[#00e186] text-[#090909] dark:text-[#e8e8e8] hover:bg-[#00c875]"
                     onClick={() => handleStatusChange("resolved")}
                   >
                     Resolver
@@ -704,7 +704,7 @@ function AtendimentoPage() {
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
               {loadingMsgs ? (
                 <div className="flex h-full items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
+                  <Loader2 className="h-5 w-5 animate-spin text-[#999] dark:text-[#686868]" />
                 </div>
               ) : (
                 displayMessages.map((m) => {
@@ -718,7 +718,7 @@ function AtendimentoPage() {
                       <div key={m.id} className={cn("flex", isAgent ? "justify-end" : "justify-start")}>
                         <div>
                           <div className="text-3xl leading-none">{m.text}</div>
-                          <div className={cn("mt-1 text-[11px] text-[#666]", isAgent ? "text-right" : "text-left")}>
+                          <div className={cn("mt-1 text-[11px] text-[#666] dark:text-[#909090]", isAgent ? "text-right" : "text-left")}>
                             {timeAgo(m.at)} atrás
                           </div>
                         </div>
@@ -733,7 +733,7 @@ function AtendimentoPage() {
                         {m.text && (
                           <div className={cn(
                             "rounded-2xl px-4 py-2.5 text-sm",
-                            isAgent ? "bg-[#090909] text-white" : "border border-[#e5e5e5] bg-[#f8f8f8] text-[#090909]"
+                            isAgent ? "bg-[#090909] text-white" : "border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] text-[#090909] dark:text-[#e8e8e8]"
                           )}>
                             {isAgent && agentHeader && (
                               <div className="mb-0.5 text-[10px] font-semibold text-white/45">{agentHeader}</div>
@@ -777,7 +777,7 @@ function AtendimentoPage() {
                               rel="noopener noreferrer"
                               className={cn(
                                 "flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm underline",
-                                isAgent ? "bg-[#090909] text-white" : "border border-[#e5e5e5] bg-[#f8f8f8] text-[#090909]"
+                                isAgent ? "bg-[#090909] text-white" : "border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] text-[#090909] dark:text-[#e8e8e8]"
                               )}
                             >
                               📎 {att.file_name ?? "Arquivo"}
@@ -785,7 +785,7 @@ function AtendimentoPage() {
                           );
                         })}
 
-                        <div className={cn("mt-1 text-[11px] text-[#666]", isAgent ? "text-right" : "text-left")}>
+                        <div className={cn("mt-1 text-[11px] text-[#666] dark:text-[#909090]", isAgent ? "text-right" : "text-left")}>
                           {timeAgo(m.at)} atrás
                         </div>
                       </div>
@@ -795,46 +795,46 @@ function AtendimentoPage() {
               )}
             </div>
 
-            <div className="border-t border-[#e5e5e5] px-6 py-4">
+            <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
               {/* File preview */}
               {attachFile && attachFile.file.type.startsWith("audio/") ? (
-                <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-[#e5e5e5] bg-[#f8f8f8] px-3 py-2">
+                <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3 py-2">
                   <div className="flex-1">
                     <AudioPlayer src={attachFile.previewUrl!} fromAgent />
                   </div>
                   <button
                     onClick={() => { if (attachFile.previewUrl) URL.revokeObjectURL(attachFile.previewUrl); setAttachFile(null); }}
-                    className="shrink-0 text-[#999] hover:text-[#090909]"
+                    className="shrink-0 text-[#999] dark:text-[#686868] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : attachFile ? (
-                <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-[#e5e5e5] bg-[#f8f8f8] px-3 py-2">
+                <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3 py-2">
                   {attachFile.previewUrl ? (
                     <img src={attachFile.previewUrl} className="h-10 w-10 rounded-lg object-cover" alt="" />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e5e5e5] text-lg">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e5e5e5] dark:bg-[#2a2a2a] text-lg">
                       📄
                     </div>
                   )}
-                  <span className="flex-1 truncate text-xs text-[#666]">{attachFile.file.name}</span>
-                  <button onClick={() => setAttachFile(null)} className="shrink-0 text-[#999] hover:text-[#090909]">
+                  <span className="flex-1 truncate text-xs text-[#666] dark:text-[#909090]">{attachFile.file.name}</span>
+                  <button onClick={() => setAttachFile(null)} className="shrink-0 text-[#999] dark:text-[#686868] hover:text-[#090909] dark:hover:text-[#e8e8e8]">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : null}
 
               {recording ? (
-                <div className="flex items-center gap-3 rounded-xl border border-[#e5e5e5] bg-[#f8f8f8] px-4 py-2.5">
+                <div className="flex items-center gap-3 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] px-4 py-2.5">
                   <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-red-500" />
-                  <span className="text-sm text-[#090909]">Gravando…</span>
-                  <span className="font-mono text-sm text-[#666]">{formatAudioTime(recordingTime)}</span>
+                  <span className="text-sm text-[#090909] dark:text-[#e8e8e8]">Gravando…</span>
+                  <span className="font-mono text-sm text-[#666] dark:text-[#909090]">{formatAudioTime(recordingTime)}</span>
                   <div className="flex-1" />
                   <button
                     onClick={cancelRecording}
                     title="Cancelar"
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#888] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#888] dark:text-[#686868] hover:bg-[#f0f0f0] dark:hover:bg-[#252525] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                   >
                     <X className="h-[18px] w-[18px]" />
                   </button>
@@ -851,7 +851,7 @@ function AtendimentoPage() {
                 {/* Attach */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#888] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#888] dark:text-[#686868] hover:bg-[#f0f0f0] dark:hover:bg-[#252525] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                 >
                   <Paperclip className="h-[18px] w-[18px]" />
                 </button>
@@ -860,7 +860,7 @@ function AtendimentoPage() {
                 <button
                   onClick={startRecording}
                   title="Gravar áudio"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#888] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#888] dark:text-[#686868] hover:bg-[#f0f0f0] dark:hover:bg-[#252525] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                 >
                   <Mic className="h-[18px] w-[18px]" />
                 </button>
@@ -869,17 +869,17 @@ function AtendimentoPage() {
                 <div ref={emojiPickerRef} className="relative shrink-0">
                   <button
                     onClick={() => setShowEmojiPicker((v) => !v)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-[#888] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-[#888] dark:text-[#686868] hover:bg-[#f0f0f0] dark:hover:bg-[#252525] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                   >
                     <Smile className="h-[18px] w-[18px]" />
                   </button>
                   {showEmojiPicker && (
-                    <div className="absolute bottom-full left-0 mb-2 grid w-[300px] grid-cols-10 gap-0.5 rounded-xl border border-[#e5e5e5] bg-white p-2 shadow-xl">
+                    <div className="absolute bottom-full left-0 mb-2 grid w-[300px] grid-cols-10 gap-0.5 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-2 shadow-xl">
                       {COMMON_EMOJIS.map((em) => (
                         <button
                           key={em}
                           onClick={() => { setDraft((d) => d + em); setShowEmojiPicker(false); }}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-[#f0f0f0]"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-[#f0f0f0] dark:hover:bg-[#252525]"
                         >
                           {em}
                         </button>
@@ -894,32 +894,32 @@ function AtendimentoPage() {
                     onClick={openTemplatePicker}
                     title="Usar template"
                     className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[#f0f0f0]",
-                      showTemplatePicker ? "bg-[#f0f0f0] text-[#090909]" : "text-[#888] hover:text-[#090909]"
+                      "flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[#f0f0f0] dark:hover:bg-[#252525]",
+                      showTemplatePicker ? "bg-[#f0f0f0] dark:bg-[#252525] text-[#090909] dark:text-[#e8e8e8]" : "text-[#888] dark:text-[#686868] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                     )}
                   >
                     <LayoutTemplate className="h-[18px] w-[18px]" />
                   </button>
 
                   {showTemplatePicker && (
-                    <div className="absolute bottom-full left-0 z-30 mb-2 w-[400px] overflow-hidden rounded-xl border border-[#e5e5e5] bg-white shadow-2xl">
+                    <div className="absolute bottom-full left-0 z-30 mb-2 w-[400px] overflow-hidden rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] shadow-2xl">
                       {selectedTemplate ? (
                         /* Variable fill form */
                         <div className="p-4">
                           <button
                             onClick={() => setSelectedTemplate(null)}
-                            className="mb-3 flex items-center gap-1 text-xs text-[#666] hover:text-[#090909]"
+                            className="mb-3 flex items-center gap-1 text-xs text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                           >
                             <ChevronLeft className="h-3.5 w-3.5" />
                             {selectedTemplate.name}
                           </button>
-                          <div className="mb-4 whitespace-pre-wrap rounded-lg bg-[#f8f8f8] p-3 text-xs text-[#090909]">
+                          <div className="mb-4 whitespace-pre-wrap rounded-lg bg-[#f8f8f8] dark:bg-[#1e1e1e] p-3 text-xs text-[#090909] dark:text-[#e8e8e8]">
                             {getTplBody(selectedTemplate)}
                           </div>
                           <div className="space-y-3">
                             {templateVars.map((v, i) => (
                               <div key={i} className="space-y-1">
-                                <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666]">
+                                <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">
                                   Variável {i + 1}
                                 </label>
                                 <input
@@ -930,7 +930,7 @@ function AtendimentoPage() {
                                     setTemplateVars(next);
                                   }}
                                   placeholder={`{{${i + 1}}}`}
-                                  className="h-9 w-full rounded-md border border-[#e5e5e5] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+                                  className="h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
                                 />
                               </div>
                             ))}
@@ -938,7 +938,7 @@ function AtendimentoPage() {
                           <div className="mt-4 flex justify-end gap-2">
                             <button
                               onClick={() => setSelectedTemplate(null)}
-                              className="rounded-md border border-[#e5e5e5] px-3 py-1.5 text-xs hover:bg-[#f0f0f0]"
+                              className="rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 py-1.5 text-xs hover:bg-[#f0f0f0] dark:hover:bg-[#252525]"
                             >
                               Voltar
                             </button>
@@ -953,25 +953,25 @@ function AtendimentoPage() {
                       ) : (
                         /* Template list */
                         <>
-                          <div className="border-b border-[#e5e5e5] p-2">
+                          <div className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] p-2">
                             <div className="relative">
-                              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#999]" />
+                              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#999] dark:text-[#686868]" />
                               <input
                                 autoFocus
                                 value={templateSearch}
                                 onChange={(e) => setTemplateSearch(e.target.value)}
                                 placeholder="Buscar template…"
-                                className="w-full rounded-lg border border-[#e5e5e5] py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+                                className="w-full rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
                               />
                             </div>
                           </div>
                           <div className="max-h-[320px] overflow-y-auto">
                             {templatesLoading ? (
                               <div className="flex items-center justify-center py-10">
-                                <Loader2 className="h-4 w-4 animate-spin text-[#999]" />
+                                <Loader2 className="h-4 w-4 animate-spin text-[#999] dark:text-[#686868]" />
                               </div>
                             ) : filteredTemplates.length === 0 ? (
-                              <p className="py-10 text-center text-sm text-[#999]">
+                              <p className="py-10 text-center text-sm text-[#999] dark:text-[#686868]">
                                 {templatesList.length === 0 ? "Nenhum template aprovado." : "Nenhum resultado."}
                               </p>
                             ) : (
@@ -989,17 +989,17 @@ function AtendimentoPage() {
                                         applyTemplate(t, []);
                                       }
                                     }}
-                                    className="w-full border-b border-[#f0f0f0] px-4 py-3 text-left transition-colors hover:bg-[#f8f8f8] last:border-0"
+                                    className="w-full border-b border-[#f0f0f0] px-4 py-3 text-left transition-colors hover:bg-[#f8f8f8] dark:hover:bg-[#1e1e1e] last:border-0"
                                   >
                                     <div className="mb-0.5 flex items-center justify-between gap-2">
-                                      <span className="text-xs font-semibold text-[#090909]">{t.name}</span>
-                                      <span className="shrink-0 rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#666]">
+                                      <span className="text-xs font-semibold text-[#090909] dark:text-[#e8e8e8]">{t.name}</span>
+                                      <span className="shrink-0 rounded-full bg-[#f0f0f0] dark:bg-[#252525] px-2 py-0.5 text-[10px] text-[#666] dark:text-[#909090]">
                                         {t.language}
                                       </span>
                                     </div>
-                                    <p className="line-clamp-2 text-xs text-[#666]">{body}</p>
+                                    <p className="line-clamp-2 text-xs text-[#666] dark:text-[#909090]">{body}</p>
                                     {numVars > 0 && (
-                                      <p className="mt-1 text-[10px] text-[#aaa]">{numVars} variável{numVars > 1 ? "is" : ""}</p>
+                                      <p className="mt-1 text-[10px] text-[#aaa] dark:text-[#626262]">{numVars} variável{numVars > 1 ? "is" : ""}</p>
                                     )}
                                   </button>
                                 );
@@ -1043,7 +1043,7 @@ function AtendimentoPage() {
       </section>
 
       {/* Right: lead panel */}
-      <aside className="w-[320px] overflow-y-auto border-l border-[#e5e5e5] p-4" style={{ background: "#f8f8f8" }}>
+      <aside className="w-[320px] overflow-y-auto border-l border-[#e5e5e5] dark:border-[#2a2a2a] p-4" style={{ background: "#f8f8f8" }}>
         {active ? (
           <LeadPanel
             conv={active}
@@ -1062,13 +1062,13 @@ function AtendimentoPage() {
       {/* New conversation modal */}
       {newConvModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="relative flex max-h-[85vh] w-[480px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+          <div className="relative flex max-h-[85vh] w-[480px] flex-col overflow-hidden rounded-2xl bg-white dark:bg-[#1a1a1a] shadow-2xl">
 
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#e5e5e5] px-6 py-4">
+            <div className="flex items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
               <div>
-                <p className="text-xs text-[#999]">Iniciar conversa via template</p>
-                <h2 className="text-base font-semibold text-[#090909]">
+                <p className="text-xs text-[#999] dark:text-[#686868]">Iniciar conversa via template</p>
+                <h2 className="text-base font-semibold text-[#090909] dark:text-[#e8e8e8]">
                   {newConvStep === "contact" && "Novo contato"}
                   {newConvStep === "template" && "Selecionar template"}
                   {newConvStep === "vars" && (newConvTemplate?.name ?? "Confirmar envio")}
@@ -1076,7 +1076,7 @@ function AtendimentoPage() {
               </div>
               <button
                 onClick={() => setNewConvModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-[#999] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#999] dark:text-[#686868] hover:bg-[#f0f0f0] dark:hover:bg-[#252525] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1086,23 +1086,23 @@ function AtendimentoPage() {
             {newConvStep === "contact" && (
               <div className="space-y-4 p-6">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666]">Nome</label>
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">Nome</label>
                   <input
                     autoFocus
                     value={newConvName}
                     onChange={(e) => setNewConvName(e.target.value)}
                     placeholder="Nome completo do contato"
-                    className="h-10 w-full rounded-lg border border-[#e5e5e5] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+                    className="h-10 w-full rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666]">Telefone</label>
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">Telefone</label>
                   <input
                     value={newConvPhone}
                     onChange={(e) => setNewConvPhone(e.target.value)}
                     placeholder="+55 11 99999-9999"
                     type="tel"
-                    className="h-10 w-full rounded-lg border border-[#e5e5e5] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+                    className="h-10 w-full rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && newConvName.trim() && newConvPhone.trim()) {
                         setNewConvStep("template");
@@ -1126,25 +1126,25 @@ function AtendimentoPage() {
             {/* Step 2: template picker */}
             {newConvStep === "template" && (
               <div className="flex flex-1 flex-col overflow-hidden">
-                <div className="border-b border-[#e5e5e5] p-3">
+                <div className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] p-3">
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#999]" />
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#999] dark:text-[#686868]" />
                     <input
                       autoFocus
                       value={newConvTplSearch}
                       onChange={(e) => setNewConvTplSearch(e.target.value)}
                       placeholder="Buscar template…"
-                      className="w-full rounded-lg border border-[#e5e5e5] py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+                      className="w-full rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
                     />
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   {templatesLoading ? (
                     <div className="flex items-center justify-center py-16">
-                      <Loader2 className="h-4 w-4 animate-spin text-[#999]" />
+                      <Loader2 className="h-4 w-4 animate-spin text-[#999] dark:text-[#686868]" />
                     </div>
                   ) : filteredNewConvTemplates.length === 0 ? (
-                    <p className="py-16 text-center text-sm text-[#999]">
+                    <p className="py-16 text-center text-sm text-[#999] dark:text-[#686868]">
                       {templatesList.length === 0 ? "Nenhum template aprovado." : "Nenhum resultado."}
                     </p>
                   ) : (
@@ -1159,25 +1159,25 @@ function AtendimentoPage() {
                             setNewConvVars(Array(Math.max(numVars, 0)).fill(""));
                             setNewConvStep("vars");
                           }}
-                          className="w-full border-b border-[#f0f0f0] px-5 py-3.5 text-left transition-colors hover:bg-[#f8f8f8] last:border-0"
+                          className="w-full border-b border-[#f0f0f0] px-5 py-3.5 text-left transition-colors hover:bg-[#f8f8f8] dark:hover:bg-[#1e1e1e] last:border-0"
                         >
                           <div className="mb-0.5 flex items-center justify-between gap-2">
-                            <span className="text-xs font-semibold text-[#090909]">{t.name}</span>
-                            <span className="shrink-0 rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] text-[#666]">{t.language}</span>
+                            <span className="text-xs font-semibold text-[#090909] dark:text-[#e8e8e8]">{t.name}</span>
+                            <span className="shrink-0 rounded-full bg-[#f0f0f0] dark:bg-[#252525] px-2 py-0.5 text-[10px] text-[#666] dark:text-[#909090]">{t.language}</span>
                           </div>
-                          <p className="line-clamp-2 text-xs text-[#666]">{body}</p>
+                          <p className="line-clamp-2 text-xs text-[#666] dark:text-[#909090]">{body}</p>
                           {numVars > 0 && (
-                            <p className="mt-0.5 text-[10px] text-[#aaa]">{numVars} variável{numVars > 1 ? "is" : ""}</p>
+                            <p className="mt-0.5 text-[10px] text-[#aaa] dark:text-[#626262]">{numVars} variável{numVars > 1 ? "is" : ""}</p>
                           )}
                         </button>
                       );
                     })
                   )}
                 </div>
-                <div className="border-t border-[#e5e5e5] px-5 py-3">
+                <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] px-5 py-3">
                   <button
                     onClick={() => setNewConvStep("contact")}
-                    className="flex items-center gap-1 text-xs text-[#666] hover:text-[#090909]"
+                    className="flex items-center gap-1 text-xs text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                     Voltar
@@ -1191,19 +1191,19 @@ function AtendimentoPage() {
               <div className="flex flex-1 flex-col overflow-hidden">
                 <div className="flex-1 space-y-4 overflow-y-auto p-5">
                   {/* Contact summary */}
-                  <div className="flex gap-8 rounded-lg bg-[#f8f8f8] px-4 py-3 text-sm">
+                  <div className="flex gap-8 rounded-lg bg-[#f8f8f8] dark:bg-[#1e1e1e] px-4 py-3 text-sm">
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#999]">Nome</div>
-                      <div className="text-[#090909]">{newConvName}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">Nome</div>
+                      <div className="text-[#090909] dark:text-[#e8e8e8]">{newConvName}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#999]">Telefone</div>
-                      <div className="text-[#090909]">{newConvPhone}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">Telefone</div>
+                      <div className="text-[#090909] dark:text-[#e8e8e8]">{newConvPhone}</div>
                     </div>
                   </div>
 
                   {/* Template body */}
-                  <div className="whitespace-pre-wrap rounded-lg border border-[#e5e5e5] bg-[#f8f8f8] px-4 py-3 text-xs text-[#090909]">
+                  <div className="whitespace-pre-wrap rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] px-4 py-3 text-xs text-[#090909] dark:text-[#e8e8e8]">
                     {getTplBody(newConvTemplate)}
                   </div>
 
@@ -1212,7 +1212,7 @@ function AtendimentoPage() {
                     <div className="space-y-3">
                       {newConvVars.map((v, i) => (
                         <div key={i} className="space-y-1">
-                          <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666]">
+                          <label className="text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090]">
                             Variável {i + 1}
                           </label>
                           <input
@@ -1224,7 +1224,7 @@ function AtendimentoPage() {
                               setNewConvVars(next);
                             }}
                             placeholder={`{{${i + 1}}}`}
-                            className="h-9 w-full rounded-md border border-[#e5e5e5] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+                            className="h-9 w-full rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
                           />
                         </div>
                       ))}
@@ -1236,10 +1236,10 @@ function AtendimentoPage() {
                   )}
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[#e5e5e5] px-5 py-3">
+                <div className="flex items-center justify-between border-t border-[#e5e5e5] dark:border-[#2a2a2a] px-5 py-3">
                   <button
                     onClick={() => { setNewConvStep("template"); setNewConvTemplate(null); }}
-                    className="flex items-center gap-1 text-xs text-[#666] hover:text-[#090909]"
+                    className="flex items-center gap-1 text-xs text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                     Voltar
@@ -1310,17 +1310,17 @@ function ConversationRow({ conv, active, onClick }: { conv: any; active: boolean
     <button
       onClick={onClick}
       className={cn(
-        "flex w-full items-start gap-3 border-b border-[#e5e5e5] px-3 py-3 text-left transition-colors",
-        active ? "bg-white" : "hover:bg-white/60"
+        "flex w-full items-start gap-3 border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-3 py-3 text-left transition-colors",
+        active ? "bg-white dark:bg-[#1a1a1a]" : "hover:bg-white/60 dark:hover:bg-[#252525]"
       )}
     >
       <ContactAvatar name={name} src={conv.meta?.sender?.avatar_url} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-semibold text-[#090909]">{name}</span>
-          <span className="shrink-0 text-[11px] text-[#666]">{timeAgo(updatedAt)}</span>
+          <span className="truncate text-sm font-semibold text-[#090909] dark:text-[#e8e8e8]">{name}</span>
+          <span className="shrink-0 text-[11px] text-[#666] dark:text-[#909090]">{timeAgo(updatedAt)}</span>
         </div>
-        <p className="mt-0.5 truncate text-xs text-[#666]">{preview}</p>
+        <p className="mt-0.5 truncate text-xs text-[#666] dark:text-[#909090]">{preview}</p>
       </div>
       {unread && (
         <span className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ background: "#00e186" }} />
@@ -1449,7 +1449,7 @@ function LeadPanel({
 
   return (
     <div className="space-y-3">
-      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-4">
+      <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-4">
         <div className="label-uppercase mb-3">Contato</div>
         <div className="mb-3 flex items-center gap-3">
           <ContactAvatar
@@ -1460,9 +1460,9 @@ function LeadPanel({
             onClick={avatarUrl ? () => setLightboxOpen(true) : undefined}
           />
           <div className="min-w-0">
-            <div className="truncate font-semibold text-[#090909]">{name}</div>
-            {phone && <div className="truncate text-xs text-[#666]">{phone}</div>}
-            {email && <div className="truncate text-xs text-[#666]">{email}</div>}
+            <div className="truncate font-semibold text-[#090909] dark:text-[#e8e8e8]">{name}</div>
+            {phone && <div className="truncate text-xs text-[#666] dark:text-[#909090]">{phone}</div>}
+            {email && <div className="truncate text-xs text-[#666] dark:text-[#909090]">{email}</div>}
           </div>
         </div>
       </div>
@@ -1481,7 +1481,7 @@ function LeadPanel({
             />
             <button
               onClick={() => setLightboxOpen(false)}
-              className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#090909] shadow-lg hover:bg-[#f0f0f0]"
+              className="absolute -right-3 -top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-[#1a1a1a] text-[#090909] dark:text-[#e8e8e8] shadow-lg hover:bg-[#f0f0f0] dark:hover:bg-[#252525]"
             >
               <X className="h-4 w-4" />
             </button>
@@ -1490,14 +1490,14 @@ function LeadPanel({
       )}
 
       {hubLoading ? (
-        <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-4">
-          <div className="flex items-center gap-2 text-xs text-[#999]">
+        <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-4">
+          <div className="flex items-center gap-2 text-xs text-[#999] dark:text-[#686868]">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
             Buscando no HubSpot…
           </div>
         </div>
       ) : hubContact ? (
-        <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-4">
+        <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-4">
           <div className="label-uppercase mb-3">HubSpot CRM</div>
           <div className="space-y-2.5 text-sm">
             {visibleFields.map((f) => {
@@ -1514,29 +1514,29 @@ function LeadPanel({
       ) : null}
 
       {hubContact && (
-        <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-4">
+        <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-4">
           <div className="label-uppercase mb-3">Observações</div>
 
           {notesLoading ? (
-            <div className="flex items-center gap-2 text-xs text-[#999]">
+            <div className="flex items-center gap-2 text-xs text-[#999] dark:text-[#686868]">
               <Loader2 className="h-3 w-3 animate-spin" />
               Carregando…
             </div>
           ) : notes.length > 0 ? (
             <div className="mb-3 max-h-[220px] space-y-2 overflow-y-auto pr-0.5">
               {notes.map((n) => (
-                <div key={n.id} className="rounded-lg bg-[#f8f8f8] px-3 py-2">
-                  <div className="mb-1 text-[10px] text-[#999]">
+                <div key={n.id} className="rounded-lg bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3 py-2">
+                  <div className="mb-1 text-[10px] text-[#999] dark:text-[#686868]">
                     {formatHsValue(n.properties.hs_timestamp)}
                   </div>
-                  <div className="whitespace-pre-wrap text-xs text-[#090909]">
+                  <div className="whitespace-pre-wrap text-xs text-[#090909] dark:text-[#e8e8e8]">
                     {n.properties.hs_note_body}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="mb-3 text-xs text-[#999]">Nenhuma observação ainda.</p>
+            <p className="mb-3 text-xs text-[#999] dark:text-[#686868]">Nenhuma observação ainda.</p>
           )}
 
           <textarea
@@ -1545,7 +1545,7 @@ function LeadPanel({
             onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) saveNote(); }}
             placeholder="Nova observação… (⌘Enter para salvar)"
             rows={3}
-            className="w-full resize-none rounded-lg border border-[#e5e5e5] px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#090909]"
+            className="w-full resize-none rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
           />
           <Button
             size="sm"
@@ -1559,7 +1559,7 @@ function LeadPanel({
       )}
 
       {/* Atribuição */}
-      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-4">
+      <div className="rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] p-4">
         <div className="label-uppercase mb-3">Atribuição</div>
 
         {/* Atual */}
@@ -1572,10 +1572,10 @@ function LeadPanel({
               >
                 {initialsOf(conv.meta.assignee.name)}
               </div>
-              <span className="text-sm text-[#090909]">{conv.meta.assignee.name}</span>
+              <span className="text-sm text-[#090909] dark:text-[#e8e8e8]">{conv.meta.assignee.name}</span>
             </>
           ) : (
-            <span className="text-sm text-[#999]">Não atribuído</span>
+            <span className="text-sm text-[#999] dark:text-[#686868]">Não atribuído</span>
           )}
         </div>
 
@@ -1584,7 +1584,7 @@ function LeadPanel({
           <select
             value={selectedAgentId}
             onChange={(e) => setSelectedAgentId(e.target.value)}
-            className="flex-1 rounded-md border border-[#e5e5e5] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#090909]"
+            className="flex-1 rounded-md border border-[#e5e5e5] dark:border-[#2a2a2a] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888]"
           >
             <option value="">Sem atribuição</option>
             {chatwootAgents.map((a) => (
@@ -1604,10 +1604,10 @@ function LeadPanel({
         {/* Histórico de atividades */}
         {activityLog.length > 0 && (
           <div className="mt-3 space-y-1.5 border-t border-[#f0f0f0] pt-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#999]">Histórico</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">Histórico</p>
             {activityLog.map((m) => (
-              <div key={m.id} className="text-[11px] text-[#999]">
-                <span className="text-[#ccc]">{timeAgo(new Date((m.created_at as number) * 1000).toISOString())} atrás</span>
+              <div key={m.id} className="text-[11px] text-[#999] dark:text-[#686868]">
+                <span className="text-[#ccc] dark:text-[#505050]">{timeAgo(new Date((m.created_at as number) * 1000).toISOString())} atrás</span>
                 {" — "}
                 <span>{m.content}</span>
               </div>
@@ -1648,15 +1648,15 @@ function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="label-uppercase mb-0.5">{label}</div>
-      <div className="font-medium text-[#090909]">{value}</div>
+      <div className="font-medium text-[#090909] dark:text-[#e8e8e8]">{value}</div>
     </div>
   );
 }
 
 function EmptyChat() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center text-center text-sm text-[#666]">
-      <UserPlus className="mb-3 h-10 w-10 text-[#c0c0c0]" />
+    <div className="flex flex-1 flex-col items-center justify-center text-center text-sm text-[#666] dark:text-[#909090]">
+      <UserPlus className="mb-3 h-10 w-10 text-[#c0c0c0] dark:text-[#505050]" />
       Selecione uma conversa para começar
     </div>
   );

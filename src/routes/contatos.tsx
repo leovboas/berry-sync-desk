@@ -131,13 +131,13 @@ function TemplateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="relative w-full max-w-lg rounded-[12px] bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
+      <div className="relative w-full max-w-lg rounded-[12px] bg-white dark:bg-[#1a1a1a] shadow-xl">
+        <div className="flex items-center justify-between border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-5 py-4">
           <div>
-            <p className="text-[13px] text-[#666]">Iniciar conversa com</p>
-            <p className="font-semibold text-[#090909]">{contactName}</p>
+            <p className="text-[13px] text-[#666] dark:text-[#909090]">Iniciar conversa com</p>
+            <p className="font-semibold text-[#090909] dark:text-[#e8e8e8]">{contactName}</p>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 text-[#666] hover:bg-[#f0f0f0]">
+          <button onClick={onClose} className="rounded-md p-1.5 text-[#666] dark:text-[#909090] hover:bg-[#f0f0f0] dark:hover:bg-[#252525]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -145,13 +145,13 @@ function TemplateModal({
         <div className="px-5 py-4">
           {!selected ? (
             <>
-              <p className="mb-3 text-sm font-medium text-[#090909]">Escolha o template</p>
+              <p className="mb-3 text-sm font-medium text-[#090909] dark:text-[#e8e8e8]">Escolha o template</p>
               {loading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#c0c0c0]" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#c0c0c0] dark:text-[#505050]" />
                 </div>
               ) : templates.length === 0 ? (
-                <p className="py-6 text-center text-sm text-[#999]">
+                <p className="py-6 text-center text-sm text-[#999] dark:text-[#686868]">
                   Nenhum template aprovado encontrado.
                 </p>
               ) : (
@@ -160,15 +160,15 @@ function TemplateModal({
                     <button
                       key={t.id ?? t.name}
                       onClick={() => selectTemplate(t)}
-                      className="flex w-full items-center justify-between rounded-lg border border-[#e5e5e5] px-3.5 py-3 text-left hover:border-[#090909] hover:bg-[#fafafa]"
+                      className="flex w-full items-center justify-between rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] px-3.5 py-3 text-left hover:border-[#090909] dark:hover:border-[#555] hover:bg-[#fafafa] dark:hover:bg-[#1e1e1e]"
                     >
                       <div>
-                        <p className="text-sm font-medium text-[#090909]">{t.name}</p>
-                        <p className="mt-0.5 text-[12px] text-[#999]">
+                        <p className="text-sm font-medium text-[#090909] dark:text-[#e8e8e8]">{t.name}</p>
+                        <p className="mt-0.5 text-[12px] text-[#999] dark:text-[#686868]">
                           {t.category} · {t.language}
                         </p>
                       </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-[#ccc]" />
+                      <ChevronRight className="h-4 w-4 shrink-0 text-[#ccc] dark:text-[#505050]" />
                     </button>
                   ))}
                 </div>
@@ -179,16 +179,16 @@ function TemplateModal({
             <>
               <button
                 onClick={() => { setSelected(null); setError(null); }}
-                className="mb-3 text-[13px] text-[#666] hover:text-[#090909]"
+                className="mb-3 text-[13px] text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
               >
                 ← Voltar aos templates
               </button>
 
-              <div className="mb-4 rounded-lg bg-[#f8f8f8] px-3.5 py-3">
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">
+              <div className="mb-4 rounded-lg bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3.5 py-3">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999] dark:text-[#686868]">
                   {selected.name}
                 </p>
-                <p className="whitespace-pre-wrap text-sm text-[#090909]">
+                <p className="whitespace-pre-wrap text-sm text-[#090909] dark:text-[#e8e8e8]">
                   {fillTemplate(getBodyText(selected), vars) || "—"}
                 </p>
               </div>
@@ -197,7 +197,7 @@ function TemplateModal({
                 <div className="mb-4 space-y-2">
                   {vars.map((v, i) => (
                     <div key={i}>
-                      <label className="mb-1 block text-[12px] text-[#666]">
+                      <label className="mb-1 block text-[12px] text-[#666] dark:text-[#909090]">
                         Variável {i + 1}
                       </label>
                       <Input
@@ -258,15 +258,15 @@ function SortTh({
   return (
     <th
       onClick={() => onSort(field)}
-      className={`cursor-pointer select-none px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] hover:text-[#090909] ${className ?? ""}`}
+      className={`cursor-pointer select-none px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8] ${className ?? ""}`}
     >
       <div className="flex items-center gap-1">
         {label}
         {active ? (
           sortDir === "asc" ? (
-            <ChevronUp className="h-3 w-3 text-[#090909]" />
+            <ChevronUp className="h-3 w-3 text-[#090909] dark:text-[#e8e8e8]" />
           ) : (
-            <ChevronDown className="h-3 w-3 text-[#090909]" />
+            <ChevronDown className="h-3 w-3 text-[#090909] dark:text-[#e8e8e8]" />
           )
         ) : (
           <ChevronsUpDown className="h-3 w-3 opacity-30" />
@@ -278,7 +278,7 @@ function SortTh({
 
 function PlainTh({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <th className={`px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] ${className ?? ""}`}>
+    <th className={`px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666] dark:text-[#909090] ${className ?? ""}`}>
       {children}
     </th>
   );
@@ -446,12 +446,12 @@ function ContatosPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Top bar */}
-      <div className="shrink-0 border-b border-[#e5e5e5] px-6 py-4">
+      <div className="shrink-0 border-b border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-[18px] font-bold text-[#090909]">
+          <h1 className="text-[18px] font-bold text-[#090909] dark:text-[#e8e8e8]">
             Contatos
             {!loading && (
-              <span className="ml-2 text-[14px] font-normal text-[#999]">
+              <span className="ml-2 text-[14px] font-normal text-[#999] dark:text-[#686868]">
                 {contacts.length}
               </span>
             )}
@@ -460,7 +460,7 @@ function ContatosPage() {
           <div className="flex flex-1 items-center gap-2 max-w-2xl">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666]" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#666] dark:text-[#909090]" />
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -474,10 +474,10 @@ function ContatosPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className={`h-9 rounded-md border px-3 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] appearance-none ${
+                className={`h-9 rounded-md border px-3 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909] dark:focus:ring-[#888] appearance-none ${
                   isFiltered
-                    ? "border-[#090909] bg-[#090909] text-white"
-                    : "border-[#e5e5e5] bg-white text-[#090909]"
+                    ? "border-[#090909] dark:border-[#555] bg-[#090909] text-white"
+                    : "border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a] text-[#090909] dark:text-[#e8e8e8]"
                 }`}
               >
                 <option value="">Status CRM</option>
@@ -485,13 +485,13 @@ function ContatosPage() {
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
-              <Filter className={`pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 ${isFiltered ? "text-white" : "text-[#666]"}`} />
+              <Filter className={`pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 ${isFiltered ? "text-white" : "text-[#666] dark:text-[#909090]"}`} />
             </div>
 
             {isFiltered && (
               <button
                 onClick={() => setStatusFilter("")}
-                className="flex items-center gap-1 text-[12px] text-[#666] hover:text-[#090909]"
+                className="flex items-center gap-1 text-[12px] text-[#666] dark:text-[#909090] hover:text-[#090909] dark:hover:text-[#e8e8e8]"
               >
                 <X className="h-3 w-3" /> Limpar
               </button>
@@ -502,9 +502,9 @@ function ContatosPage() {
 
       {/* Table */}
       <div className="flex-1 overflow-auto px-6 py-4">
-        <div className="overflow-hidden rounded-[10px] border border-[#e5e5e5] bg-white">
+        <div className="overflow-hidden rounded-[10px] border border-[#e5e5e5] dark:border-[#2a2a2a] bg-white dark:bg-[#1a1a1a]">
           <table className="w-full min-w-[900px] text-sm">
-            <thead className="border-b border-[#e5e5e5] bg-[#f8f8f8]">
+            <thead className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e]">
               <tr>
                 <SortTh label="Nome" field="name" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[200px]" />
                 <PlainTh className="w-[140px]">Empresa</PlainTh>
@@ -519,14 +519,14 @@ function ContatosPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center text-[#666]">
-                    <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-[#c0c0c0]" />
+                  <td colSpan={8} className="px-4 py-16 text-center text-[#666] dark:text-[#909090]">
+                    <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-[#c0c0c0] dark:text-[#505050]" />
                   </td>
                 </tr>
               ) : contacts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center text-[#666]">
-                    <Users className="mx-auto mb-3 h-10 w-10 text-[#c0c0c0]" />
+                  <td colSpan={8} className="px-4 py-16 text-center text-[#666] dark:text-[#909090]">
+                    <Users className="mx-auto mb-3 h-10 w-10 text-[#c0c0c0] dark:text-[#505050]" />
                     <p className="text-sm">
                       {q.trim()
                         ? "Nenhum contato encontrado."
@@ -553,7 +553,7 @@ function ContatosPage() {
                   return (
                     <tr
                       key={c.id}
-                      className="border-b border-[#e5e5e5] last:border-0 hover:bg-[#fafafa]"
+                      className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] last:border-0 hover:bg-[#fafafa] dark:hover:bg-[#1e1e1e]"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2 min-w-0">
@@ -563,21 +563,21 @@ function ContatosPage() {
                           >
                             {initialsOf(name)}
                           </div>
-                          <span className="truncate font-medium text-[#090909]" title={name}>{name}</span>
+                          <span className="truncate font-medium text-[#090909] dark:text-[#e8e8e8]" title={name}>{name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 max-w-[140px]">
-                        <span className="block truncate text-[#090909]" title={company}>{company}</span>
+                        <span className="block truncate text-[#090909] dark:text-[#e8e8e8]" title={company}>{company}</span>
                       </td>
-                      <td className="px-4 py-3 text-[#666] whitespace-nowrap">{phone}</td>
+                      <td className="px-4 py-3 text-[#666] dark:text-[#909090] whitespace-nowrap">{phone}</td>
                       <td className="px-4 py-3 max-w-[200px]">
-                        <span className="block truncate text-[#666]" title={email}>{email}</span>
+                        <span className="block truncate text-[#666] dark:text-[#909090]" title={email}>{email}</span>
                       </td>
                       <td className="px-4 py-3">
-                        {status ? <StatusBadge status={status} /> : <span className="text-[#999]">—</span>}
+                        {status ? <StatusBadge status={status} /> : <span className="text-[#999] dark:text-[#686868]">—</span>}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-[#666]">{fmtDate(createDate)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-[#666]">{fmtDate(lastContact)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-[#666] dark:text-[#909090]">{fmtDate(createDate)}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-[#666] dark:text-[#909090]">{fmtDate(lastContact)}</td>
                       <td className="px-4 py-3">
                         {(() => {
                           const key = phone !== "—" ? lastNineDigits(phone) : "";
@@ -601,7 +601,7 @@ function ContatosPage() {
                               {phone !== "—" && (!existingConv || existingConv.status === "resolved") && (
                                 <button
                                   onClick={() => setConvModal(c)}
-                                  className="flex items-center gap-1.5 rounded-lg border border-[#e5e5e5] px-2.5 py-1.5 text-[12px] font-medium text-[#090909] transition-colors hover:border-[#090909] hover:bg-[#090909] hover:text-white whitespace-nowrap"
+                                  className="flex items-center gap-1.5 rounded-lg border border-[#e5e5e5] dark:border-[#2a2a2a] px-2.5 py-1.5 text-[12px] font-medium text-[#090909] dark:text-[#e8e8e8] transition-colors hover:border-[#090909] dark:hover:border-[#555] hover:bg-[#090909] hover:text-white whitespace-nowrap"
                                 >
                                   <MessageSquarePlus className="h-3.5 w-3.5" />
                                   Iniciar
