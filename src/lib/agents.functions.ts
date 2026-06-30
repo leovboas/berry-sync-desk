@@ -33,6 +33,19 @@ export const inviteAgent = createServerFn({ method: "POST" })
     return { id: userId, tempPassword };
   });
 
+export const resetAgentPassword = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const tempPassword = generateTempPassword();
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.id, {
+      password: tempPassword,
+      ban_duration: "none",
+      email_confirm: true,
+    } as any);
+    if (error) throw new Error(error.message);
+    return { tempPassword };
+  });
+
 export const updateAgent = createServerFn({ method: "POST" })
   .inputValidator((data: { id: string; name: string; role: "admin" | "agent" }) => data)
   .handler(async ({ data }) => {

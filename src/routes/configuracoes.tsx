@@ -16,7 +16,7 @@ import {
   DEFAULT_HS_FIELDS,
   type HsField,
 } from "@/lib/hubspot.functions";
-import { inviteAgent, updateAgent, removeAgent } from "@/lib/agents.functions";
+import { inviteAgent, updateAgent, removeAgent, resetAgentPassword } from "@/lib/agents.functions";
 import { Search, Loader2, MoreVertical, Check, Copy } from "lucide-react";
 
 function formatGroupName(g: string): string {
@@ -494,6 +494,7 @@ function AgentsTab() {
   const [showInvite, setShowInvite] = useState(false);
   const [editTarget, setEditTarget] = useState<Agent | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Agent | null>(null);
+  const [resetTarget, setResetTarget] = useState<Agent | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
   const myAgent = agents.find((a) => a.id === myId);
@@ -606,12 +607,18 @@ function AgentsTab() {
                         <MoreVertical className="h-4 w-4" />
                       </button>
                       {menuOpenId === a.id && (
-                        <div className="absolute right-2 top-10 z-20 w-36 rounded-[10px] border border-[#e5e5e5] bg-white py-1 shadow-lg">
+                        <div className="absolute right-2 top-10 z-20 w-44 rounded-[10px] border border-[#e5e5e5] bg-white py-1 shadow-lg">
                           <button
                             onMouseDown={(e) => { e.stopPropagation(); setEditTarget(a); setMenuOpenId(null); }}
                             className="w-full px-4 py-2 text-left text-sm text-[#090909] hover:bg-[#f8f8f8]"
                           >
                             Editar
+                          </button>
+                          <button
+                            onMouseDown={(e) => { e.stopPropagation(); setResetTarget(a); setMenuOpenId(null); }}
+                            className="w-full px-4 py-2 text-left text-sm text-[#090909] hover:bg-[#f8f8f8]"
+                          >
+                            Redefinir senha
                           </button>
                           {a.id !== myId && (
                             <button
@@ -670,6 +677,102 @@ function AgentsTab() {
           }}
         />
       )}
+
+      {resetTarget && (
+        <ResetPasswordModal
+          agent={resetTarget}
+          onClose={() => setResetTarget(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ResetPasswordModal({ agent, onClose }: { agent: Agent; onClose: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleReset() {
+    setLoading(true);
+    setError("");
+    try {
+      const result = await resetAgentPassword({ data: { id: agent.id } });
+      setTempPassword(result.tempPassword);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function copyPassword() {
+    if (!tempPassword) return;
+    navigator.clipboard.writeText(tempPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={onClose}>
+      <div className="w-full max-w-md rounded-[14px] bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+        {tempPassword ? (
+          <>
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#e8f5e9]">
+              <Check className="h-5 w-5 text-[#2e7d32]" />
+            </div>
+            <h3 className="mb-1 text-base font-semibold text-[#090909]">Senha redefinida!</h3>
+            <p className="mb-5 text-sm text-[#666]">
+              Compartilhe as novas credenciais com <strong>{agent.name || agent.email}</strong>. O usuário já pode acessar.
+            </p>
+            <div className="space-y-3 rounded-[10px] border border-[#e5e5e5] bg-[#f8f8f8] p-4">
+              <div>
+                <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#999]">E-mail</p>
+                <p className="text-sm text-[#090909]">{agent.email}</p>
+              </div>
+              <div>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">Nova senha temporária</p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 rounded-md border border-[#e5e5e5] bg-white px-3 py-2 font-mono text-sm font-bold text-[#090909] shadow-sm">
+                    {tempPassword}
+                  </code>
+                  <button
+                    onClick={copyPassword}
+                    className="flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e5] bg-white px-3 py-2 text-xs font-medium text-[#090909] hover:bg-[#f0f0f0]"
+                  >
+                    {copied
+                      ? <><Check className="h-3.5 w-3.5 text-green-600" /> Copiado</>
+                      : <><Copy className="h-3.5 w-3.5" /> Copiar</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <Button className="mt-5 w-full bg-[#090909] text-white hover:bg-[#090909]/90" onClick={onClose}>
+              Fechar
+            </Button>
+          </>
+        ) : (
+          <>
+            <h3 className="mb-1 text-base font-semibold text-[#090909]">Redefinir senha</h3>
+            <p className="mb-5 text-sm text-[#666]">
+              Uma nova senha temporária será gerada para{" "}
+              <strong>{agent.name || agent.email}</strong>. O usuário também será ativado caso esteja inativo.
+            </p>
+            {error && <p className="mb-4 text-xs text-red-600">{error}</p>}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
+              <Button
+                className="bg-[#090909] text-white hover:bg-[#090909]/90"
+                onClick={handleReset}
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Gerar nova senha"}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
