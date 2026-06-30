@@ -595,7 +595,7 @@ function AtendimentoPage() {
   return (
     <div className="flex h-[calc(100vh-52px)]">
       {/* Left: conversation list */}
-      <aside className="flex w-[300px] flex-col border-r border-[#e5e5e5] dark:border-[#2a2a2a]" style={{ background: "#f8f8f8" }}>
+      <aside className="flex w-[300px] flex-col border-r border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e]">
         <div className="border-b border-[#e5e5e5] dark:border-[#2a2a2a] p-3">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
@@ -1043,7 +1043,7 @@ function AtendimentoPage() {
       </section>
 
       {/* Right: lead panel */}
-      <aside className="w-[320px] overflow-y-auto border-l border-[#e5e5e5] dark:border-[#2a2a2a] p-4" style={{ background: "#f8f8f8" }}>
+      <aside className="w-[320px] overflow-y-auto border-l border-[#e5e5e5] dark:border-[#2a2a2a] p-4 bg-[#f8f8f8] dark:bg-[#1e1e1e]">
         {active ? (
           <LeadPanel
             conv={active}

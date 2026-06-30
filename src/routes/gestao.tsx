@@ -268,16 +268,20 @@ function AgentColumn({
     >
       {/* Header */}
       <div
-        className="shrink-0 border-b px-4 py-3"
-        style={{ background: "#f9f9f9", borderColor: isUnassigned ? "#f59e0b44" : "#f0f0f0" }}
+        className="shrink-0 border-b bg-[#f9f9f9] dark:bg-[#1e1e1e] px-4 py-3"
+        style={{ borderColor: isUnassigned ? "#f59e0b44" : "var(--color-border)" }}
       >
         {/* Name row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="relative shrink-0">
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold"
-                style={{ background: isUnassigned ? "#e5e5e5" : "#090909", color: isUnassigned ? "#999" : "#fff" }}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold",
+                  isUnassigned
+                    ? "bg-[#e5e5e5] dark:bg-[#2a2a2a] text-[#999] dark:text-[#686868]"
+                    : "bg-[#090909] dark:bg-[#f0f0f0] text-white dark:text-[#090909]"
+                )}
               >
                 {isUnassigned ? "?" : initialsOf(name)}
               </div>

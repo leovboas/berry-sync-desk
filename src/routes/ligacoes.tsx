@@ -210,8 +210,7 @@ function CallStatusBadge({ status }: { status: string | null }) {
   if (status === "missed") {
     return (
       <span
-        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-        style={{ background: "#ffe8d6", color: "#c2410c" }}
+        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-[#ffe8d6] dark:bg-[#4a1a00] text-[#c2410c] dark:text-[#ff8c42]"
       >
         <PhoneMissed className="h-3 w-3" /> Perdida
       </span>
