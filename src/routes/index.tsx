@@ -195,6 +195,7 @@ function AtendimentoPage() {
   const [templatesLoading, setTemplatesLoading] = useState(false);
   const [templateSearch, setTemplateSearch] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
+  const [draftIsTemplate, setDraftIsTemplate] = useState(false);
   const [templateVars, setTemplateVars] = useState<string[]>([]);
 
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -356,7 +357,7 @@ function AtendimentoPage() {
     const text = draft.trim();
     if (!text && !attachFile) return;
 
-    const prefix = agentName ? `*${agentName}*\n` : "";
+    const prefix = agentName && !draftIsTemplate ? `*${agentName}*\n` : "";
     const content = text ? `${prefix}${text}` : "";
 
     setSending(true);
@@ -377,6 +378,7 @@ function AtendimentoPage() {
         await sendChatwootMessage({ data: { conversationId: activeId, content } });
       }
       setDraft("");
+      setDraftIsTemplate(false);
       const updated = await getChatwootMessages({ data: { conversationId: activeId } });
       setMessages(updated);
     } catch (e) {
@@ -426,6 +428,7 @@ function AtendimentoPage() {
     let body = getTplBody(tpl);
     vars.forEach((v, i) => { body = body.replaceAll(`{{${i + 1}}}`, v); });
     setDraft(body);
+    setDraftIsTemplate(true);
     setShowTemplatePicker(false);
     setSelectedTemplate(null);
     setTemplateVars([]);
@@ -803,7 +806,7 @@ function AtendimentoPage() {
 
                 <Input
                   value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
+                  onChange={(e) => { setDraft(e.target.value); setDraftIsTemplate(false); }}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                   placeholder="Digite uma mensagem…"
                   className="h-11 flex-1"
