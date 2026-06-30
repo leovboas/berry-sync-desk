@@ -24,19 +24,19 @@ const statusLabel: Record<AgentStatus, string> = {
   offline: "Offline",
 };
 
-const navItems = [
-  { to: "/", label: "Atendimento" },
-  { to: "/gestao", label: "Gestor" },
-  { to: "/ligacoes", label: "Ligações" },
-  { to: "/contatos", label: "Contatos" },
-  { to: "/templates", label: "Templates" },
-  { to: "/configuracoes", label: "Configurações" },
+const ALL_NAV_ITEMS = [
+  { to: "/", label: "Atendimento", adminOnly: false },
+  { to: "/gestao", label: "Gestor", adminOnly: true },
+  { to: "/ligacoes", label: "Ligações", adminOnly: false },
+  { to: "/contatos", label: "Contatos", adminOnly: false },
+  { to: "/templates", label: "Templates", adminOnly: false },
+  { to: "/configuracoes", label: "Configurações", adminOnly: true },
 ] as const;
 
 export function AppHeader() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const [agent, setAgent] = useState<{ name: string; status: AgentStatus } | null>(null);
+  const [agent, setAgent] = useState<{ name: string; status: AgentStatus; role: string } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -45,14 +45,13 @@ export function AppHeader() {
       if (!u.user) return;
       const { data } = await supabase
         .from("agents")
-        .select("name, status")
+        .select("name, status, role")
         .eq("id", u.user.id)
         .maybeSingle();
-      if (active && data) setAgent({ name: data.name, status: (data.status as AgentStatus) || "online" });
+      if (active && data)
+        setAgent({ name: data.name, status: (data.status as AgentStatus) || "online", role: data.role ?? "agent" });
     })();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
   async function changeStatus(next: AgentStatus) {
@@ -77,22 +76,24 @@ export function AppHeader() {
           <BerryLogo height={22} />
         </Link>
         <nav className="flex items-center gap-6">
-          {navItems.map((item) => {
-            const active =
-              item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "text-sm transition-opacity",
-                  active ? "text-white font-semibold" : "text-white/80 hover:text-white"
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {ALL_NAV_ITEMS
+            .filter((item) => !item.adminOnly || agent?.role === "admin")
+            .map((item) => {
+              const active =
+                item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={cn(
+                    "text-sm transition-opacity",
+                    active ? "text-white font-semibold" : "text-white/80 hover:text-white"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
         </nav>
       </div>
 

@@ -185,6 +185,8 @@ function AtendimentoPage() {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [sending, setSending] = useState(false);
   const [agentName, setAgentName] = useState("");
+  const [myRole, setMyRole] = useState<"admin" | "agent" | null>(null);
+  const [myChatwootAgentId, setMyChatwootAgentId] = useState<number | null>(null);
   const [attachFile, setAttachFile] = useState<AttachFile | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [visibleFields, setVisibleFields] = useState<HsField[]>(DEFAULT_HS_FIELDS);
@@ -232,8 +234,20 @@ function AtendimentoPage() {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const { data } = await supabase.from("agents").select("name").eq("id", u.user.id).maybeSingle();
+      const { data } = await supabase.from("agents").select("name, role, email").eq("id", u.user.id).maybeSingle();
       if (data?.name) setAgentName(data.name);
+      const role = (data?.role ?? "agent") as "admin" | "agent";
+      setMyRole(role);
+      if (role === "agent") {
+        const authEmail = u.user.email ?? (data as any)?.email ?? "";
+        try {
+          const agents = await getChatwootAgents({ data: {} as Record<string, never> });
+          const match = agents.find((a) => a.email === authEmail);
+          if (match) setMyChatwootAgentId(match.id);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     })();
     getHubSpotVisibleFields()
       .then((fields) => { if (fields?.length) setVisibleFields(fields); })
@@ -252,6 +266,11 @@ function AtendimentoPage() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const displayedConversations = useMemo(() => {
+    if (myRole !== "agent" || myChatwootAgentId === null) return conversations;
+    return conversations.filter((c) => c.meta?.assignee?.id === myChatwootAgentId);
+  }, [conversations, myRole, myChatwootAgentId]);
 
   useEffect(() => {
     setLoadingConvs(true);
@@ -290,13 +309,13 @@ function AtendimentoPage() {
 
   const visible = useMemo(
     () =>
-      conversations.filter((c) => {
+      displayedConversations.filter((c) => {
         const name = (c.meta?.sender?.name ?? "").toLowerCase();
         const preview = (c.last_message?.content ?? "").toLowerCase();
         const q = search.toLowerCase();
         return q === "" || name.includes(q) || preview.includes(q);
       }),
-    [conversations, search]
+    [displayedConversations, search]
   );
 
   const active = conversations.find((c) => c.id === activeId) ?? null;
