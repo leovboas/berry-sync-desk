@@ -539,7 +539,7 @@ function AtendimentoPage() {
                             {isAgent && agentHeader && (
                               <div className="mb-0.5 text-[10px] font-semibold text-white/45">{agentHeader}</div>
                             )}
-                            <div>{isAgent ? agentBody : m.text}</div>
+                            <div className="whitespace-pre-wrap">{isAgent ? agentBody : m.text}</div>
                           </div>
                         )}
 
