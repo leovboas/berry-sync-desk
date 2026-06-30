@@ -1,15 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+function generateTempPassword(): string {
+  const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let pwd = "Berry@";
+  for (let i = 0; i < 6; i++) {
+    pwd += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return pwd;
+}
+
 export const inviteAgent = createServerFn({ method: "POST" })
   .inputValidator((data: { name: string; email: string; role: "admin" | "agent" }) => data)
   .handler(async ({ data }) => {
-    const { data: inviteData, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
-      data.email,
-      { data: { name: data.name } }
-    );
+    const tempPassword = generateTempPassword();
+    const { data: userData, error } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { name: data.name },
+    });
     if (error) throw new Error(error.message);
-    const userId = inviteData.user.id;
+    const userId = userData.user.id;
     const { error: dbErr } = await supabaseAdmin.from("agents").upsert({
       id: userId,
       name: data.name,
@@ -18,7 +30,7 @@ export const inviteAgent = createServerFn({ method: "POST" })
       status: "offline",
     });
     if (dbErr) throw new Error(dbErr.message);
-    return { id: userId };
+    return { id: userId, tempPassword };
   });
 
 export const updateAgent = createServerFn({ method: "POST" })
@@ -36,7 +48,6 @@ export const removeAgent = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.from("agents").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
-    // Disable auth user so they can't log in anymore
     await supabaseAdmin.auth.admin.updateUserById(data.id, {
       ban_duration: "876600h",
     });

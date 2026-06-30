@@ -17,7 +17,7 @@ import {
   type HsField,
 } from "@/lib/hubspot.functions";
 import { inviteAgent, updateAgent, removeAgent } from "@/lib/agents.functions";
-import { Search, Loader2, MoreVertical } from "lucide-react";
+import { Search, Loader2, MoreVertical, Check, Copy } from "lucide-react";
 
 function formatGroupName(g: string): string {
   const map: Record<string, string> = {
@@ -634,13 +634,12 @@ function AgentsTab() {
 
       {showInvite && (
         <AgentModal
-          title="Convidar agente"
-          confirmLabel="Enviar convite"
-          onClose={() => setShowInvite(false)}
+          title="Adicionar agente"
+          confirmLabel="Criar acesso"
+          onClose={() => { setShowInvite(false); load(); }}
           onConfirm={async ({ name, email, role }) => {
-            await inviteAgent({ data: { name, email, role } });
-            toast.success(`Convite enviado para ${email}`);
-            load();
+            const result = await inviteAgent({ data: { name, email, role } });
+            return result;
           }}
         />
       )}
@@ -688,13 +687,15 @@ function AgentModal({
   initial?: Agent;
   emailReadOnly?: boolean;
   onClose: () => void;
-  onConfirm: (data: { name: string; email: string; role: "admin" | "agent" }) => Promise<void>;
+  onConfirm: (data: { name: string; email: string; role: "admin" | "agent" }) => Promise<{ tempPassword: string } | void>;
 }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [role, setRole] = useState<"admin" | "agent">((initial?.role as any) ?? "agent");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [done, setDone] = useState<{ tempPassword: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   async function submit() {
     if (!name.trim()) { setError("Informe o nome."); return; }
@@ -702,13 +703,67 @@ function AgentModal({
     setLoading(true);
     setError("");
     try {
-      await onConfirm({ name: name.trim(), email: email.trim(), role });
-      onClose();
+      const result = await onConfirm({ name: name.trim(), email: email.trim(), role });
+      if (result?.tempPassword) {
+        setDone(result);
+      } else {
+        onClose();
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function copyPassword() {
+    if (!done) return;
+    navigator.clipboard.writeText(done.tempPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (done) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="w-full max-w-md rounded-[14px] bg-white p-6 shadow-2xl">
+          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-[#e8f5e9]">
+            <Check className="h-5 w-5 text-[#2e7d32]" />
+          </div>
+          <h3 className="mb-1 text-base font-semibold text-[#090909]">Agente criado!</h3>
+          <p className="mb-5 text-sm text-[#666]">
+            Compartilhe as credenciais abaixo com <strong>{name.trim()}</strong>. Ele pode trocar a senha após o primeiro acesso.
+          </p>
+
+          <div className="space-y-3 rounded-[10px] border border-[#e5e5e5] bg-[#f8f8f8] p-4">
+            <div>
+              <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#999]">E-mail</p>
+              <p className="text-sm text-[#090909]">{email.trim()}</p>
+            </div>
+            <div>
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">Senha temporária</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded-md bg-white px-3 py-2 font-mono text-sm font-bold text-[#090909] shadow-sm border border-[#e5e5e5]">
+                  {done.tempPassword}
+                </code>
+                <button
+                  onClick={copyPassword}
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-[#e5e5e5] bg-white px-3 py-2 text-xs font-medium text-[#090909] hover:bg-[#f0f0f0]"
+                >
+                  {copied
+                    ? <><Check className="h-3.5 w-3.5 text-green-600" /> Copiado</>
+                    : <><Copy className="h-3.5 w-3.5" /> Copiar</>}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <Button className="mt-5 w-full bg-[#090909] text-white hover:bg-[#090909]/90" onClick={onClose}>
+            Fechar
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
