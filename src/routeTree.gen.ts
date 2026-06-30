@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LigacoesRouteImport } from './routes/ligacoes'
+import { Route as GestaoRouteImport } from './routes/gestao'
 import { Route as ContatosRouteImport } from './routes/contatos'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,6 +30,11 @@ const LoginRoute = LoginRouteImport.update({
 const LigacoesRoute = LigacoesRouteImport.update({
   id: '/ligacoes',
   path: '/ligacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoRoute = GestaoRouteImport.update({
+  id: '/gestao',
+  path: '/gestao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContatosRoute = ContatosRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contatos': typeof ContatosRoute
+  '/gestao': typeof GestaoRoute
   '/ligacoes': typeof LigacoesRoute
   '/login': typeof LoginRoute
   '/templates': typeof TemplatesRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contatos': typeof ContatosRoute
+  '/gestao': typeof GestaoRoute
   '/ligacoes': typeof LigacoesRoute
   '/login': typeof LoginRoute
   '/templates': typeof TemplatesRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contatos': typeof ContatosRoute
+  '/gestao': typeof GestaoRoute
   '/ligacoes': typeof LigacoesRoute
   '/login': typeof LoginRoute
   '/templates': typeof TemplatesRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/configuracoes'
     | '/contatos'
+    | '/gestao'
     | '/ligacoes'
     | '/login'
     | '/templates'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/configuracoes'
     | '/contatos'
+    | '/gestao'
     | '/ligacoes'
     | '/login'
     | '/templates'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/configuracoes'
     | '/contatos'
+    | '/gestao'
     | '/ligacoes'
     | '/login'
     | '/templates'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ContatosRoute: typeof ContatosRoute
+  GestaoRoute: typeof GestaoRoute
   LigacoesRoute: typeof LigacoesRoute
   LoginRoute: typeof LoginRoute
   TemplatesRoute: typeof TemplatesRoute
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/ligacoes'
       fullPath: '/ligacoes'
       preLoaderRoute: typeof LigacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao': {
+      id: '/gestao'
+      path: '/gestao'
+      fullPath: '/gestao'
+      preLoaderRoute: typeof GestaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contatos': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ContatosRoute: ContatosRoute,
+  GestaoRoute: GestaoRoute,
   LigacoesRoute: LigacoesRoute,
   LoginRoute: LoginRoute,
   TemplatesRoute: TemplatesRoute,

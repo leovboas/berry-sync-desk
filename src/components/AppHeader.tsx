@@ -1,6 +1,6 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Bell, ChevronDown, Plus } from "lucide-react";
+import { Bell, ChevronDown } from "lucide-react";
 import { BerryLogo } from "./BerryLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { initialsOf, cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ const statusLabel: Record<AgentStatus, string> = {
 
 const navItems = [
   { to: "/", label: "Atendimento" },
+  { to: "/gestao", label: "Gestor" },
   { to: "/ligacoes", label: "Ligações" },
   { to: "/contatos", label: "Contatos" },
   { to: "/templates", label: "Templates" },
@@ -96,14 +97,6 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          className="flex items-center gap-2 rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white hover:bg-white/5"
-          onClick={() => router.navigate({ to: "/" })}
-        >
-          <Plus className="h-4 w-4" />
-          Novo Ticket
-        </button>
-
         <button className="rounded-md p-2 text-white/80 hover:bg-white/5 hover:text-white">
           <Bell className="h-4 w-4" />
         </button>
