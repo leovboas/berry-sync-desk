@@ -12,28 +12,59 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       agents: {
         Row: {
           created_at: string
           email: string
+          hubspot_email: string | null
           id: string
           name: string
+          role: string
           status: string
         }
         Insert: {
           created_at?: string
           email?: string
+          hubspot_email?: string | null
           id: string
           name?: string
+          role?: string
           status?: string
         }
         Update: {
           created_at?: string
           email?: string
+          hubspot_email?: string | null
           id?: string
           name?: string
+          role?: string
           status?: string
         }
         Relationships: []
@@ -88,6 +119,27 @@ export type Database = {
           },
         ]
       }
+      chatwoot_events: {
+        Row: {
+          account_id: number | null
+          created_at: string | null
+          event_type: string
+          id: number
+        }
+        Insert: {
+          account_id?: number | null
+          created_at?: string | null
+          event_type: string
+          id?: number
+        }
+        Update: {
+          account_id?: number | null
+          created_at?: string | null
+          event_type?: string
+          id?: number
+        }
+        Relationships: []
+      }
       hubspot_cache: {
         Row: {
           cached_at: string
@@ -115,6 +167,7 @@ export type Database = {
           chatwoot_token: string | null
           chatwoot_url: string | null
           hubspot_token: string | null
+          hubspot_visible_fields: Json | null
           id: number
           updated_at: string
         }
@@ -123,6 +176,7 @@ export type Database = {
           chatwoot_token?: string | null
           chatwoot_url?: string | null
           hubspot_token?: string | null
+          hubspot_visible_fields?: Json | null
           id?: number
           updated_at?: string
         }
@@ -131,6 +185,7 @@ export type Database = {
           chatwoot_token?: string | null
           chatwoot_url?: string | null
           hubspot_token?: string | null
+          hubspot_visible_fields?: Json | null
           id?: number
           updated_at?: string
         }
@@ -270,6 +325,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

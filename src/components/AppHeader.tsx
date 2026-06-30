@@ -28,6 +28,7 @@ const navItems = [
   { to: "/", label: "Atendimento" },
   { to: "/ligacoes", label: "Ligações" },
   { to: "/contatos", label: "Contatos" },
+  { to: "/templates", label: "Templates" },
   { to: "/configuracoes", label: "Configurações" },
 ] as const;
 

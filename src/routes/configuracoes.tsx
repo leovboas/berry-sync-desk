@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,35 @@ import { cn, initialsOf } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { testChatwootConnection } from "@/lib/chatwoot.functions";
-import { testHubspotConnection } from "@/lib/hubspot.functions";
+import {
+  testHubspotConnection,
+  getHubSpotProperties,
+  getHubSpotVisibleFields,
+  setHubSpotVisibleFields,
+  DEFAULT_HS_FIELDS,
+  type HsField,
+} from "@/lib/hubspot.functions";
+import { inviteAgent, updateAgent, removeAgent } from "@/lib/agents.functions";
+import { Search, Loader2, MoreVertical } from "lucide-react";
+
+function formatGroupName(g: string): string {
+  const map: Record<string, string> = {
+    contactinformation: "Informações do contato",
+    leadinformation: "Informações de lead",
+    emailinformation: "E-mail",
+    socialmediainformation: "Redes sociais",
+    conversioninformation: "Conversões",
+    analyticshistory: "Analytics",
+    hubspot_internal: "Interno HubSpot",
+    callstoinformation: "Chamadas",
+    loggingactivities: "Atividades",
+    deals: "Negócios",
+    closedrevenue: "Receita",
+    salesproperties: "Vendas",
+    recentactivities: "Atividades recentes",
+  };
+  return map[g] ?? g.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — Berry" }] }),
@@ -19,11 +47,12 @@ export const Route = createFileRoute("/configuracoes")({
   ),
 });
 
-type Tab = "account" | "integrations" | "agents";
+type Tab = "account" | "integrations" | "agents" | "fields";
 const tabs: { key: Tab; label: string }[] = [
   { key: "account", label: "Minha conta" },
   { key: "integrations", label: "Integrações" },
   { key: "agents", label: "Agentes" },
+  { key: "fields", label: "Campos do Lead" },
 ];
 
 function ConfiguracoesPage() {
@@ -56,6 +85,7 @@ function ConfiguracoesPage() {
       {tab === "account" && <AccountTab />}
       {tab === "integrations" && <IntegrationsTab />}
       {tab === "agents" && <AgentsTab />}
+      {tab === "fields" && <FieldsTab />}
     </div>
   );
 }
@@ -63,6 +93,8 @@ function ConfiguracoesPage() {
 function AccountTab() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [hubspotEmail, setHubspotEmail] = useState("");
+  const [role, setRole] = useState("agent");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -71,12 +103,14 @@ function AccountTab() {
       if (!u.user) return;
       const { data } = await supabase
         .from("agents")
-        .select("name, email")
+        .select("name, email, role, hubspot_email")
         .eq("id", u.user.id)
         .maybeSingle();
       if (data) {
         setName(data.name ?? "");
         setEmail(data.email ?? u.user.email ?? "");
+        setRole((data as any).role ?? "agent");
+        setHubspotEmail((data as any).hubspot_email ?? "");
       } else {
         setEmail(u.user.email ?? "");
       }
@@ -89,7 +123,7 @@ function AccountTab() {
     if (!u.user) return;
     const { error } = await supabase
       .from("agents")
-      .upsert({ id: u.user.id, name, email })
+      .upsert({ id: u.user.id, name, email, hubspot_email: hubspotEmail || null })
       .eq("id", u.user.id);
     setSaving(false);
     if (error) toast.error(error.message);
@@ -106,8 +140,15 @@ function AccountTab() {
           {initialsOf(name || email)}
         </div>
         <div>
-          <div className="text-sm font-semibold text-[#090909]">Avatar</div>
-          <div className="text-xs text-[#666]">Gerado a partir das iniciais.</div>
+          <div className="text-sm font-semibold text-[#090909]">{name || email}</div>
+          <span
+            className={cn(
+              "mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold",
+              role === "admin" ? "bg-[#090909] text-white" : "bg-[#f0f0f0] text-[#666]"
+            )}
+          >
+            {role === "admin" ? "Admin" : "Agente"}
+          </span>
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -118,6 +159,18 @@ function AccountTab() {
         <div className="space-y-1.5">
           <Label className="label-uppercase">E-mail</Label>
           <Input value={email} disabled />
+        </div>
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label className="label-uppercase">E-mail no HubSpot</Label>
+          <Input
+            value={hubspotEmail}
+            onChange={(e) => setHubspotEmail(e.target.value)}
+            placeholder="Mesmo e-mail do seu usuário na HubSpot (se diferente do login)"
+            type="email"
+          />
+          <p className="text-xs text-[#999]">
+            Usado para encontrar os contatos atribuídos a você. Deixe em branco para usar o e-mail de login.
+          </p>
         </div>
       </div>
       <div className="mt-6">
@@ -294,85 +347,458 @@ function Field({
   );
 }
 
-type Agent = { id: string; name: string; email: string; status: string };
-function AgentsTab() {
-  const [agents, setAgents] = useState<Agent[]>([]);
+function FieldsTab() {
+  const [properties, setProperties] = useState<Array<{ name: string; label: string; groupName: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("agents")
-        .select("id, name, email, status")
-        .order("created_at", { ascending: true });
-      setAgents((data as Agent[]) ?? []);
-    })();
+    Promise.all([
+      getHubSpotVisibleFields(),
+      getHubSpotProperties(),
+    ])
+      .then(([saved, props]) => {
+        const fields = saved ?? DEFAULT_HS_FIELDS;
+        setSelected(new Set(fields.map((f) => f.name)));
+        setProperties(
+          props
+            .filter((p) => p.fieldType !== "calculation_equation" && !p.name.startsWith("hs_analytics_"))
+            .sort((a, b) => a.label.localeCompare(b.label, "pt"))
+        );
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
   }, []);
 
+  function toggle(name: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+  }
+
+  async function save() {
+    setSaving(true);
+    const fields: HsField[] = properties
+      .filter((p) => selected.has(p.name))
+      .map((p) => ({ name: p.name, label: p.label }));
+    try {
+      await setHubSpotVisibleFields({ data: { fields } });
+      toast.success(`${fields.length} campos salvos`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const filtered = properties.filter((p) => {
+    const q = search.toLowerCase();
+    return !q || p.label.toLowerCase().includes(q) || p.name.toLowerCase().includes(q);
+  });
+
+  const groups = filtered.reduce<Record<string, typeof filtered>>((acc, p) => {
+    const g = p.groupName ?? "other";
+    (acc[g] ??= []).push(p);
+    return acc;
+  }, {});
+
   return (
-    <div className="rounded-[10px] border border-[#e5e5e5] bg-white">
-      <div className="flex items-center justify-between border-b border-[#e5e5e5] p-4">
-        <h3 className="text-sm font-semibold text-[#090909]">Agentes</h3>
-        <Button size="sm" className="bg-[#090909] text-white hover:bg-[#090909]/90">
-          Convidar agente
-        </Button>
-      </div>
-      <table className="w-full text-sm">
-        <thead className="border-b border-[#e5e5e5] bg-[#f8f8f8]">
-          <tr>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">
-              Nome
-            </th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">
-              E-mail
-            </th>
-            <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">
-              Status
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {agents.length === 0 ? (
-            <tr>
-              <td colSpan={3} className="px-4 py-10 text-center text-[#666]">
-                Nenhum agente ainda.
-              </td>
-            </tr>
-          ) : (
-            agents.map((a) => (
-              <tr key={a.id} className="border-b border-[#e5e5e5] last:border-0">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold"
-                      style={{ background: "#00e186", color: "#090909" }}
+    <div className="space-y-4">
+      <div className="rounded-[10px] border border-[#e5e5e5] bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-[#090909]">Campos do Lead</h3>
+            <p className="text-xs text-[#666]">
+              Selecione quais propriedades do HubSpot aparecem no painel lateral da conversa.
+            </p>
+          </div>
+          <span className="text-xs text-[#666]">{selected.size} selecionados</span>
+        </div>
+
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar campo…"
+            className="pl-9"
+          />
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
+          </div>
+        ) : error ? (
+          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">{error}</div>
+        ) : (
+          <div className="max-h-[500px] space-y-5 overflow-y-auto pr-1">
+            {Object.entries(groups).map(([group, props]) => (
+              <div key={group}>
+                <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#999]">
+                  {formatGroupName(group)}
+                </div>
+                <div className="divide-y divide-[#f0f0f0]">
+                  {props.map((p) => (
+                    <label
+                      key={p.name}
+                      className="flex cursor-pointer items-center gap-3 py-2 px-1 hover:bg-[#f8f8f8] rounded-lg"
                     >
-                      {initialsOf(a.name || a.email)}
-                    </div>
-                    <span className="font-medium text-[#090909]">{a.name || "—"}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-[#666]">{a.email}</td>
-                <td className="px-4 py-3">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-[#090909]">
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{
-                        background:
-                          a.status === "online"
-                            ? "#00e186"
-                            : a.status === "away"
-                              ? "#f59e0b"
-                              : "#d1d5db",
-                      }}
-                    />
-                    {a.status}
-                  </span>
-                </td>
-              </tr>
-            ))
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p.name)}
+                        onChange={() => toggle(p.name)}
+                        className="h-4 w-4 shrink-0 accent-[#090909]"
+                      />
+                      <div className="min-w-0">
+                        <div className="text-sm text-[#090909]">{p.label}</div>
+                        <div className="text-[11px] text-[#999]">{p.name}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Button
+        onClick={save}
+        disabled={loading || saving}
+        className="bg-[#090909] text-white hover:bg-[#090909]/90"
+      >
+        {saving ? "Salvando…" : "Salvar campos"}
+      </Button>
+    </div>
+  );
+}
+
+type Agent = { id: string; name: string; email: string; status: string; role: string };
+
+const STATUS_COLOR: Record<string, string> = {
+  online: "#00e186",
+  away: "#f59e0b",
+  offline: "#d1d5db",
+};
+
+function AgentsTab() {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [myId, setMyId] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showInvite, setShowInvite] = useState(false);
+  const [editTarget, setEditTarget] = useState<Agent | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Agent | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+
+  const myAgent = agents.find((a) => a.id === myId);
+  const isAdmin = myAgent?.role === "admin";
+
+  async function load() {
+    setLoading(true);
+    const { data: u } = await supabase.auth.getUser();
+    setMyId(u.user?.id ?? "");
+    const { data } = await supabase
+      .from("agents")
+      .select("id, name, email, status, role")
+      .order("created_at", { ascending: true });
+    setAgents(((data ?? []) as any[]).map((a) => ({ ...a, role: a.role ?? "agent" })));
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  // close dropdown on outside click
+  useEffect(() => {
+    if (!menuOpenId) return;
+    const close = () => setMenuOpenId(null);
+    window.addEventListener("mousedown", close);
+    return () => window.removeEventListener("mousedown", close);
+  }, [menuOpenId]);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-[10px] border border-[#e5e5e5] bg-white">
+        <div className="flex items-center justify-between border-b border-[#e5e5e5] px-5 py-4">
+          <div>
+            <h3 className="text-sm font-semibold text-[#090909]">Agentes</h3>
+            {!isAdmin && !loading && (
+              <p className="mt-0.5 text-xs text-[#999]">Apenas admins podem gerenciar agentes.</p>
+            )}
+          </div>
+          {isAdmin && (
+            <Button
+              size="sm"
+              className="bg-[#090909] text-white hover:bg-[#090909]/90"
+              onClick={() => setShowInvite(true)}
+            >
+              + Convidar agente
+            </Button>
           )}
-        </tbody>
-      </table>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="border-b border-[#e5e5e5] bg-[#f8f8f8]">
+              <tr>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">Nome</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">E-mail</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">Perfil</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[#666]">Status</th>
+                {isAdmin && <th className="w-10 px-2 py-3" />}
+              </tr>
+            </thead>
+            <tbody>
+              {agents.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#999]">
+                    Nenhum agente cadastrado.
+                  </td>
+                </tr>
+              ) : agents.map((a) => (
+                <tr key={a.id} className="border-b border-[#e5e5e5] last:border-0">
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
+                        style={{ background: "#00e186", color: "#090909" }}
+                      >
+                        {initialsOf(a.name || a.email)}
+                      </div>
+                      <span className="font-medium text-[#090909]">
+                        {a.name || "—"}
+                        {a.id === myId && (
+                          <span className="ml-1.5 text-[10px] font-normal text-[#999]">(você)</span>
+                        )}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3 text-[#666]">{a.email}</td>
+                  <td className="px-5 py-3">
+                    <span className={cn(
+                      "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                      a.role === "admin" ? "bg-[#090909] text-white" : "bg-[#f0f0f0] text-[#666]"
+                    )}>
+                      {a.role === "admin" ? "Admin" : "Agente"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3">
+                    <span className="flex items-center gap-1.5 text-xs text-[#090909]">
+                      <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLOR[a.status] ?? "#d1d5db" }} />
+                      {a.status ?? "offline"}
+                    </span>
+                  </td>
+                  {isAdmin && (
+                    <td className="relative px-2 py-3">
+                      <button
+                        onMouseDown={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === a.id ? null : a.id); }}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-[#999] hover:bg-[#f0f0f0] hover:text-[#090909]"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                      {menuOpenId === a.id && (
+                        <div className="absolute right-2 top-10 z-20 w-36 rounded-[10px] border border-[#e5e5e5] bg-white py-1 shadow-lg">
+                          <button
+                            onMouseDown={(e) => { e.stopPropagation(); setEditTarget(a); setMenuOpenId(null); }}
+                            className="w-full px-4 py-2 text-left text-sm text-[#090909] hover:bg-[#f8f8f8]"
+                          >
+                            Editar
+                          </button>
+                          {a.id !== myId && (
+                            <button
+                              onMouseDown={(e) => { e.stopPropagation(); setDeleteTarget(a); setMenuOpenId(null); }}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                            >
+                              Remover
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showInvite && (
+        <AgentModal
+          title="Convidar agente"
+          confirmLabel="Enviar convite"
+          onClose={() => setShowInvite(false)}
+          onConfirm={async ({ name, email, role }) => {
+            await inviteAgent({ data: { name, email, role } });
+            toast.success(`Convite enviado para ${email}`);
+            load();
+          }}
+        />
+      )}
+
+      {editTarget && (
+        <AgentModal
+          title="Editar agente"
+          confirmLabel="Salvar"
+          initial={editTarget}
+          emailReadOnly
+          onClose={() => setEditTarget(null)}
+          onConfirm={async ({ name, role }) => {
+            await updateAgent({ data: { id: editTarget.id, name, role } });
+            toast.success("Agente atualizado");
+            load();
+          }}
+        />
+      )}
+
+      {deleteTarget && (
+        <ConfirmDeleteModal
+          agent={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={async () => {
+            await removeAgent({ data: { id: deleteTarget.id } });
+            toast.success(`${deleteTarget.name || deleteTarget.email} removido`);
+            load();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function AgentModal({
+  title,
+  confirmLabel,
+  initial,
+  emailReadOnly = false,
+  onClose,
+  onConfirm,
+}: {
+  title: string;
+  confirmLabel: string;
+  initial?: Agent;
+  emailReadOnly?: boolean;
+  onClose: () => void;
+  onConfirm: (data: { name: string; email: string; role: "admin" | "agent" }) => Promise<void>;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [email, setEmail] = useState(initial?.email ?? "");
+  const [role, setRole] = useState<"admin" | "agent">((initial?.role as any) ?? "agent");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit() {
+    if (!name.trim()) { setError("Informe o nome."); return; }
+    if (!emailReadOnly && !email.trim()) { setError("Informe o e-mail."); return; }
+    setLoading(true);
+    setError("");
+    try {
+      await onConfirm({ name: name.trim(), email: email.trim(), role });
+      onClose();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={onClose}>
+      <div className="w-full max-w-md rounded-[14px] bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+        <h3 className="mb-5 text-base font-semibold text-[#090909]">{title}</h3>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="label-uppercase">Nome</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo" autoFocus />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="label-uppercase">E-mail</Label>
+            {emailReadOnly ? (
+              <div className="flex h-10 items-center rounded-md border border-[#e5e5e5] bg-[#f8f8f8] px-3 text-sm text-[#666]">
+                {email}
+              </div>
+            ) : (
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@empresa.com" type="email" />
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label className="label-uppercase">Perfil</Label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as "admin" | "agent")}
+              className="h-10 w-full rounded-md border border-[#e5e5e5] px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#090909]"
+            >
+              <option value="agent">Agente — acesso padrão ao atendimento</option>
+              <option value="admin">Admin — gerencia agentes e configurações</option>
+            </select>
+          </div>
+        </div>
+        {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
+          <Button className="bg-[#090909] text-white hover:bg-[#090909]/90" onClick={submit} disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : confirmLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmDeleteModal({
+  agent,
+  onClose,
+  onConfirm,
+}: {
+  agent: Agent;
+  onClose: () => void;
+  onConfirm: () => Promise<void>;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function confirm() {
+    setLoading(true);
+    setError("");
+    try {
+      await onConfirm();
+      onClose();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onMouseDown={onClose}>
+      <div className="w-full max-w-sm rounded-[14px] bg-white p-6 shadow-2xl" onMouseDown={(e) => e.stopPropagation()}>
+        <h3 className="mb-2 text-base font-semibold text-[#090909]">Remover agente</h3>
+        <p className="text-sm text-[#666]">
+          Tem certeza que deseja remover <strong>{agent.name || agent.email}</strong>?
+          O acesso será revogado imediatamente.
+        </p>
+        {error && <p className="mt-3 text-xs text-red-600">{error}</p>}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
+          <Button
+            className="bg-red-600 text-white hover:bg-red-700"
+            onClick={confirm}
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remover"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

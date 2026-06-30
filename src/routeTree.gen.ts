@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TemplatesRouteImport } from './routes/templates'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LigacoesRouteImport } from './routes/ligacoes'
 import { Route as ContatosRouteImport } from './routes/contatos'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TemplatesRoute = TemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/contatos': typeof ContatosRoute
   '/ligacoes': typeof LigacoesRoute
   '/login': typeof LoginRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/contatos': typeof ContatosRoute
   '/ligacoes': typeof LigacoesRoute
   '/login': typeof LoginRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/contatos': typeof ContatosRoute
   '/ligacoes': typeof LigacoesRoute
   '/login': typeof LoginRoute
+  '/templates': typeof TemplatesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/configuracoes' | '/contatos' | '/ligacoes' | '/login'
+  fullPaths:
+    | '/'
+    | '/configuracoes'
+    | '/contatos'
+    | '/ligacoes'
+    | '/login'
+    | '/templates'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/configuracoes' | '/contatos' | '/ligacoes' | '/login'
-  id: '__root__' | '/' | '/configuracoes' | '/contatos' | '/ligacoes' | '/login'
+  to:
+    | '/'
+    | '/configuracoes'
+    | '/contatos'
+    | '/ligacoes'
+    | '/login'
+    | '/templates'
+  id:
+    | '__root__'
+    | '/'
+    | '/configuracoes'
+    | '/contatos'
+    | '/ligacoes'
+    | '/login'
+    | '/templates'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +105,18 @@ export interface RootRouteChildren {
   ContatosRoute: typeof ContatosRoute
   LigacoesRoute: typeof LigacoesRoute
   LoginRoute: typeof LoginRoute
+  TemplatesRoute: typeof TemplatesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/templates': {
+      id: '/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatosRoute: ContatosRoute,
   LigacoesRoute: LigacoesRoute,
   LoginRoute: LoginRoute,
+  TemplatesRoute: TemplatesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
