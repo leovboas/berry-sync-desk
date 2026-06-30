@@ -9,10 +9,14 @@ import {
   getMyHubSpotContacts,
   getAllHubSpotContacts,
 } from "@/lib/hubspot.functions";
-import { getChatwootTemplates, startConversationWithTemplate } from "@/lib/chatwoot.functions";
+import {
+  getChatwootTemplates,
+  startConversationWithTemplate,
+  getAllChatwootConversations,
+} from "@/lib/chatwoot.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Search, Users, Loader2, MessageSquarePlus, X, ChevronRight,
+  Search, Users, Loader2, MessageSquarePlus, MessageSquare, X, ChevronRight,
   ChevronUp, ChevronDown, ChevronsUpDown, Filter,
 } from "lucide-react";
 
@@ -44,6 +48,10 @@ function getBodyText(t: any): string {
 function fmtDate(iso: string | undefined): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function lastNineDigits(phone: string): string {
+  return phone.replace(/\D/g, "").slice(-9);
 }
 
 type SortField = "name" | "createdate" | "notes_last_updated";
@@ -313,6 +321,7 @@ function ContatosPage() {
   const [convModal, setConvModal] = useState<any | null>(null);
   const [agentEmail, setAgentEmail] = useState("");
   const [myRole, setMyRole] = useState<"admin" | "agent" | null>(null);
+  const [convIndex, setConvIndex] = useState<Record<string, { id: number; status: "open" | "pending" | "resolved" }>>({});
 
   // Sort & filter
   const [sortField, setSortField] = useState<SortField>("createdate");
@@ -346,6 +355,34 @@ function ContatosPage() {
         console.error(e);
       } finally {
         setLoadingMy(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [open, pending, resolved] = await Promise.all([
+          getAllChatwootConversations({ data: { status: "open" } }),
+          getAllChatwootConversations({ data: { status: "pending" } }),
+          getAllChatwootConversations({ data: { status: "resolved" } }),
+        ]);
+        const index: Record<string, { id: number; status: "open" | "pending" | "resolved" }> = {};
+        const byStatus: [typeof open, "open" | "pending" | "resolved"][] = [
+          [open, "open"],
+          [pending, "pending"],
+          [resolved, "resolved"],
+        ];
+        for (const [convs, status] of byStatus) {
+          for (const c of convs) {
+            const phone = c.meta?.sender?.phone_number ?? "";
+            const key = lastNineDigits(phone);
+            if (key && !index[key]) index[key] = { id: c.id, status };
+          }
+        }
+        setConvIndex(index);
+      } catch (e) {
+        console.error(e);
       }
     })();
   }, []);
@@ -476,7 +513,7 @@ function ContatosPage() {
                 <PlainTh className="w-[120px]">Status CRM</PlainTh>
                 <SortTh label="Criado em" field="createdate" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[120px]" />
                 <SortTh label="Últ. contato" field="notes_last_updated" sortField={sortField} sortDir={sortDir} onSort={handleSort} className="w-[120px]" />
-                <PlainTh className="w-[90px]">{""}</PlainTh>
+                <PlainTh className="w-[180px]">{""}</PlainTh>
               </tr>
             </thead>
             <tbody>
@@ -542,15 +579,37 @@ function ContatosPage() {
                       <td className="px-4 py-3 whitespace-nowrap text-[#666]">{fmtDate(createDate)}</td>
                       <td className="px-4 py-3 whitespace-nowrap text-[#666]">{fmtDate(lastContact)}</td>
                       <td className="px-4 py-3">
-                        {phone !== "—" && (
-                          <button
-                            onClick={() => setConvModal(c)}
-                            className="flex items-center gap-1.5 rounded-lg border border-[#e5e5e5] px-2.5 py-1.5 text-[12px] font-medium text-[#090909] transition-colors hover:border-[#090909] hover:bg-[#090909] hover:text-white whitespace-nowrap"
-                          >
-                            <MessageSquarePlus className="h-3.5 w-3.5" />
-                            Iniciar
-                          </button>
-                        )}
+                        {(() => {
+                          const key = phone !== "—" ? lastNineDigits(phone) : "";
+                          const existingConv = key ? convIndex[key] : undefined;
+                          return (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {existingConv && (
+                                <button
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/",
+                                      search: { conversationId: existingConv.id, status: existingConv.status },
+                                    })
+                                  }
+                                  className="flex items-center gap-1.5 rounded-lg bg-[#090909] px-2.5 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-[#090909]/90 whitespace-nowrap"
+                                >
+                                  <MessageSquare className="h-3.5 w-3.5" />
+                                  Continuar
+                                </button>
+                              )}
+                              {phone !== "—" && (!existingConv || existingConv.status === "resolved") && (
+                                <button
+                                  onClick={() => setConvModal(c)}
+                                  className="flex items-center gap-1.5 rounded-lg border border-[#e5e5e5] px-2.5 py-1.5 text-[12px] font-medium text-[#090909] transition-colors hover:border-[#090909] hover:bg-[#090909] hover:text-white whitespace-nowrap"
+                                >
+                                  <MessageSquarePlus className="h-3.5 w-3.5" />
+                                  Iniciar
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                     </tr>
                   );

@@ -158,7 +158,16 @@ function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
+type AtendimentoSearch = {
+  conversationId?: number;
+  status?: "open" | "pending" | "resolved";
+};
+
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): AtendimentoSearch => ({
+    conversationId: search.conversationId ? Number(search.conversationId) : undefined,
+    status: (search.status as AtendimentoSearch["status"]) ?? undefined,
+  }),
   head: () => ({ meta: [{ title: "Atendimento — Berry" }] }),
   component: () => (
     <AppShell>
@@ -175,7 +184,10 @@ const tabs: { key: Tab; label: string }[] = [
 ];
 
 function AtendimentoPage() {
-  const [tab, setTab] = useState<Tab>("open");
+  const routeSearch = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const pendingConversationIdRef = useRef<number | null>(routeSearch.conversationId ?? null);
+  const [tab, setTab] = useState<Tab>(routeSearch.status ?? "open");
   const [search, setSearch] = useState("");
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -300,7 +312,14 @@ function AtendimentoPage() {
     getChatwootConversations({ data: { status: tab } })
       .then((convs) => {
         setConversations(convs);
-        if (convs.length > 0) setActiveId(convs[0].id);
+        const pending = pendingConversationIdRef.current;
+        if (pending && convs.some((c) => c.id === pending)) {
+          setActiveId(pending);
+          pendingConversationIdRef.current = null;
+          navigate({ to: "/", search: {}, replace: true });
+        } else if (convs.length > 0) {
+          setActiveId(convs[0].id);
+        }
       })
       .catch(console.error)
       .finally(() => setLoadingConvs(false));
