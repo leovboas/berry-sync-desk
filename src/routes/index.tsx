@@ -7,6 +7,8 @@ import { cn, initialsOf, timeAgo } from "@/lib/utils";
 import {
   getChatwootConversations,
   getChatwootMessages,
+  getContactHistory,
+  backfillContactHistory,
   sendChatwootMessage,
   sendChatwootAttachment,
   updateChatwootConversationStatus,
@@ -251,6 +253,8 @@ function AtendimentoPage() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
+  const [historyMessages, setHistoryMessages] = useState<any[]>([]);
+  const [backfilling, setBackfilling] = useState(false);
   const [hubContact, setHubContact] = useState<any>(null);
   const [hubLoading, setHubLoading] = useState(false);
   const [draft, setDraft] = useState("");
@@ -414,21 +418,44 @@ function AtendimentoPage() {
   }, [tab]);
 
   useEffect(() => {
-    if (!activeId) { setMessages([]); setHubContact(null); return; }
+    if (!activeId) { setMessages([]); setHistoryMessages([]); setHubContact(null); return; }
+
+    const phone = conversations.find((c) => c.id === activeId)?.meta?.sender?.phone_number ?? "";
+
     setLoadingMsgs(true);
-    getChatwootMessages({ data: { conversationId: activeId } })
-      .then(setMessages)
+
+    // Load current conversation messages (with sync to history) + full contact history in parallel
+    Promise.all([
+      getChatwootMessages({ data: { conversationId: activeId, contactPhone: phone || undefined } }),
+      phone ? getContactHistory({ data: { contactPhone: phone } }) : Promise.resolve([]),
+    ])
+      .then(([msgs, history]) => {
+        setMessages(msgs);
+        setHistoryMessages(history);
+        // If history is empty, trigger a backfill in the background
+        if (phone && history.length === 0) {
+          setBackfilling(true);
+          backfillContactHistory({ data: { contactPhone: phone } })
+            .then(() => getContactHistory({ data: { contactPhone: phone } }))
+            .then(setHistoryMessages)
+            .catch(() => {})
+            .finally(() => setBackfilling(false));
+        }
+      })
       .catch(console.error)
       .finally(() => setLoadingMsgs(false));
 
     // Poll every 15s to pick up delivery status updates from WhatsApp webhooks
     const poll = setInterval(() => {
-      getChatwootMessages({ data: { conversationId: activeId } })
-        .then(setMessages)
+      getChatwootMessages({ data: { conversationId: activeId, contactPhone: phone || undefined } })
+        .then((msgs) => {
+          setMessages(msgs);
+          // Refresh history too so status updates propagate
+          if (phone) getContactHistory({ data: { contactPhone: phone } }).then(setHistoryMessages).catch(() => {});
+        })
         .catch(() => {});
     }, 15_000);
 
-    const phone = conversations.find((c) => c.id === activeId)?.meta?.sender?.phone_number ?? "";
     setHubContact(null);
     if (phone) {
       setHubLoading(true);
@@ -466,37 +493,53 @@ function AtendimentoPage() {
 
   const active = conversations.find((c) => c.id === activeId) ?? null;
 
-  const displayMessages = useMemo(
-    () =>
-      messages
-        .filter((m) => m.message_type !== 2 && (m.content || m.attachments?.length > 0))
-        .map((m) => {
-          // Chatwoot top-level status string → numeric delivery status
-          const statusStr = m.status as string | undefined;
-          const statusFromStr = statusStr === "read" ? 2
-            : statusStr === "delivered" ? 1
-            : statusStr === "sent" ? 0
-            : statusStr === "failed" ? 3
-            : undefined;
-          return {
-            id: m.id,
-            from: m.message_type === 1 ? ("agent" as const) : ("contact" as const),
-            text: (m.content as string) || null,
-            attachments: (m.attachments ?? []) as any[],
-            at: new Date((m.created_at as number) * 1000).toISOString(),
-            // WhatsApp delivery status: 0=sent, 1=delivered, 2=read, 3=failed
-            deliveryStatus: (m.content_attributes?.whatsapp?.status as number | undefined)
-              ?? (m.content_attributes?.status as number | undefined)
-              ?? statusFromStr,
-            // Error info from Chatwoot (e.g. 131026 Message undeliverable)
-            errorCode: (m.content_attributes?.whatsapp?.errorCode as string | undefined)
-              ?? (m.content_attributes?.error_code as string | undefined),
-            errorMessage: (m.content_attributes?.whatsapp?.errorMessage as string | undefined)
-              ?? (m.content_attributes?.error_message as string | undefined),
-          };
-        }),
-    [messages]
-  );
+  const displayMessages = useMemo(() => {
+    function mapMsg(m: any, sourceConvId?: number) {
+      const statusStr = m.status as string | undefined;
+      const statusFromStr = statusStr === "read" ? 2
+        : statusStr === "delivered" ? 1
+        : statusStr === "sent" ? 0
+        : statusStr === "failed" ? 3
+        : undefined;
+      const contentAttrs = m.content_attributes ?? {};
+      return {
+        id: m.id ?? m.chatwoot_message_id,
+        chatwootMessageId: (m.id ?? m.chatwoot_message_id) as number,
+        conversationId: (m.conversation_id ?? sourceConvId) as number,
+        from: m.message_type === 1 ? ("agent" as const) : ("contact" as const),
+        text: (m.content as string) || null,
+        attachments: (m.attachments ?? []) as any[],
+        at: m.created_at_chatwoot
+          ? (m.created_at_chatwoot as string)
+          : new Date((m.created_at as number) * 1000).toISOString(),
+        deliveryStatus: (contentAttrs.whatsapp?.status as number | undefined)
+          ?? (contentAttrs.status as number | undefined)
+          ?? statusFromStr,
+        errorCode: (contentAttrs.whatsapp?.errorCode as string | undefined)
+          ?? (contentAttrs.error_code as string | undefined),
+        errorMessage: (contentAttrs.whatsapp?.errorMessage as string | undefined)
+          ?? (contentAttrs.error_message as string | undefined),
+        fromHistory: !!m.created_at_chatwoot,
+      };
+    }
+
+    // Build a deduplicated, chronologically sorted list from history + current messages
+    const historyById = new Map<number, ReturnType<typeof mapMsg>>();
+    for (const m of historyMessages) {
+      if (m.message_type === 2) continue;
+      if (!m.content && !(m.attachments?.length)) continue;
+      historyById.set(m.chatwoot_message_id as number, mapMsg(m));
+    }
+    // Current conversation messages override history (fresher status)
+    for (const m of messages) {
+      if (m.message_type === 2) continue;
+      if (!m.content && !(m.attachments?.length)) continue;
+      historyById.set(m.id as number, mapMsg(m, activeId ?? undefined));
+    }
+
+    return Array.from(historyById.values())
+      .sort((a, b) => a.at.localeCompare(b.at));
+  }, [messages, historyMessages, activeId]);
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -830,31 +873,53 @@ function AtendimentoPage() {
             </header>
 
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
+              {backfilling && (
+                <div className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-3 py-2 text-[11px] text-blue-600 dark:text-blue-400">
+                  <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+                  <span>Carregando histórico completo do contato…</span>
+                </div>
+              )}
               {loadingMsgs ? (
                 <div className="flex h-full items-center justify-center">
                   <Loader2 className="h-5 w-5 animate-spin text-[#999] dark:text-[#686868]" />
                 </div>
               ) : (
-                displayMessages.map((m) => {
+                displayMessages.map((m, idx) => {
                   const isAgent = m.from === "agent";
                   const emojiOnly = m.text && isEmojiOnly(m.text) && m.attachments.length === 0;
                   const { name: agentHeader, body: agentBody } =
                     isAgent && m.text ? parseAgentHeader(m.text) : { name: null, body: m.text };
 
+                  // Separator when conversation changes
+                  const prevMsg = idx > 0 ? displayMessages[idx - 1] : null;
+                  const convChanged = prevMsg && prevMsg.conversationId !== m.conversationId;
+                  const separator = convChanged ? (
+                    <div key={`sep-${m.conversationId}`} className="flex items-center gap-3 py-1">
+                      <div className="flex-1 border-t border-dashed border-[#e5e5e5] dark:border-[#2a2a2a]" />
+                      <span className="text-[10px] text-[#aaa] dark:text-[#555] whitespace-nowrap">
+                        Nova conversa · {new Date(m.at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                      </span>
+                      <div className="flex-1 border-t border-dashed border-[#e5e5e5] dark:border-[#2a2a2a]" />
+                    </div>
+                  ) : null;
+
                   if (emojiOnly) {
                     return (
-                      <div key={m.id} className={cn("flex", isAgent ? "justify-end" : "justify-start")}>
-                        <div>
-                          <div className="text-3xl leading-none">{m.text}</div>
-                          <div className={cn("mt-1 flex items-center gap-1 text-[11px] text-[#666] dark:text-[#909090]", isAgent ? "justify-end" : "justify-start")}>
-                            <span>{timeAgo(m.at)} atrás</span>
-                            {isAgent && (
-                              <MessageStatus
-                                status={m.deliveryStatus}
-                                errorCode={m.errorCode}
-                                errorMessage={m.errorMessage}
-                              />
-                            )}
+                      <div key={m.id}>
+                        {separator}
+                        <div className={cn("flex", isAgent ? "justify-end" : "justify-start")}>
+                          <div>
+                            <div className="text-3xl leading-none">{m.text}</div>
+                            <div className={cn("mt-1 flex items-center gap-1 text-[11px] text-[#666] dark:text-[#909090]", isAgent ? "justify-end" : "justify-start")}>
+                              <span>{timeAgo(m.at)} atrás</span>
+                              {isAgent && (
+                                <MessageStatus
+                                  status={m.deliveryStatus}
+                                  errorCode={m.errorCode}
+                                  errorMessage={m.errorMessage}
+                                />
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -862,7 +927,9 @@ function AtendimentoPage() {
                   }
 
                   return (
-                    <div key={m.id} className={cn("flex", isAgent ? "justify-end" : "justify-start")}>
+                    <div key={m.id}>
+                      {separator}
+                    <div className={cn("flex", isAgent ? "justify-end" : "justify-start")}>
                       <div className="max-w-[70%]">
                         {/* Text bubble */}
                         {m.text && (
@@ -935,7 +1002,7 @@ function AtendimentoPage() {
                               title="Reenviar mensagem"
                               onClick={async () => {
                                 try {
-                                  await retryChatwootMessage({ data: { conversationId: active!.id, messageId: m.id } });
+                                  await retryChatwootMessage({ data: { conversationId: m.conversationId ?? active!.id, messageId: m.chatwootMessageId } });
                                   const updated = await getChatwootMessages({ data: { conversationId: active!.id } });
                                   setMessages(updated);
                                 } catch {
@@ -960,6 +1027,7 @@ function AtendimentoPage() {
                           )}
                         </div>
                       </div>
+                    </div>
                     </div>
                   );
                 })

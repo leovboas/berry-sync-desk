@@ -64,8 +64,37 @@ export const getAllChatwootConversations = createServerFn({ method: "POST" })
     return all;
   });
 
+function normalizePhone(raw: string | null | undefined): string {
+  if (!raw) return "";
+  return raw.replace(/\D/g, "");
+}
+
+async function upsertMessagesToHistory(msgs: any[], contactPhone: string, conversationId: number) {
+  if (!msgs.length || !contactPhone) return;
+  const phone = normalizePhone(contactPhone);
+  const rows = msgs
+    .filter((m) => m.message_type !== 2) // skip activity messages
+    .map((m) => ({
+      chatwoot_message_id: m.id as number,
+      conversation_id: conversationId,
+      contact_phone: phone,
+      message_type: m.message_type as number,
+      content: (m.content as string) ?? null,
+      status: (m.status as string) ?? null,
+      content_attributes: m.content_attributes ?? {},
+      attachments: m.attachments ?? [],
+      sender_name: (m.sender?.name as string) ?? null,
+      sender_type: (m.sender?.type as string) ?? null,
+      created_at_chatwoot: new Date((m.created_at as number) * 1000).toISOString(),
+    }));
+  if (!rows.length) return;
+  await (supabaseAdmin as any)
+    .from("messages_history")
+    .upsert(rows, { onConflict: "chatwoot_message_id", ignoreDuplicates: false });
+}
+
 export const getChatwootMessages = createServerFn({ method: "POST" })
-  .inputValidator((data: { conversationId: number }) => data)
+  .inputValidator((data: { conversationId: number; contactPhone?: string }) => data)
   .handler(async ({ data }) => {
     const s = await getChatwootSettings();
     const res = await fetch(
@@ -74,7 +103,69 @@ export const getChatwootMessages = createServerFn({ method: "POST" })
     );
     if (!res.ok) throw new Error(`Chatwoot error: ${res.status}`);
     const json = await res.json();
-    return (json.payload ?? []) as any[];
+    const msgs = (json.payload ?? []) as any[];
+    // Proactively sync to history if phone is provided
+    if (data.contactPhone) {
+      await upsertMessagesToHistory(msgs, data.contactPhone, data.conversationId);
+    }
+    return msgs;
+  });
+
+export const getContactHistory = createServerFn({ method: "POST" })
+  .inputValidator((data: { contactPhone: string }) => data)
+  .handler(async ({ data }) => {
+    const phone = normalizePhone(data.contactPhone);
+    const { data: rows, error } = await (supabaseAdmin as any)
+      .from("messages_history")
+      .select("*")
+      .eq("contact_phone", phone)
+      .order("created_at_chatwoot", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as any[];
+  });
+
+export const backfillContactHistory = createServerFn({ method: "POST" })
+  .inputValidator((data: { contactPhone: string }) => data)
+  .handler(async ({ data }) => {
+    const s = await getChatwootSettings();
+    const phone = normalizePhone(data.contactPhone);
+    // Search contact conversations by phone across all statuses
+    let total = 0;
+    for (const status of ["open", "resolved", "pending"] as const) {
+      let page = 1;
+      while (true) {
+        const res = await fetch(
+          `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/conversations?status=${status}&page=${page}`,
+          { headers: { api_access_token: s.chatwoot_token! } }
+        );
+        if (!res.ok) break;
+        const json = await res.json();
+        const convs: any[] = json.data?.payload ?? [];
+        if (!convs.length) break;
+        for (const conv of convs) {
+          const convPhone = normalizePhone(conv.meta?.sender?.phone_number);
+          if (convPhone !== phone) continue;
+          // Fetch all messages for this conversation (paginated)
+          let before: number | undefined;
+          while (true) {
+            const url = `${s.url}/api/v1/accounts/${s.chatwoot_account_id}/conversations/${conv.id}/messages${before ? `?before=${before}` : ""}`;
+            const mRes = await fetch(url, { headers: { api_access_token: s.chatwoot_token! } });
+            if (!mRes.ok) break;
+            const mJson = await mRes.json();
+            const msgs: any[] = mJson.payload ?? [];
+            if (!msgs.length) break;
+            await upsertMessagesToHistory(msgs, phone, conv.id);
+            total += msgs.filter((m) => m.message_type !== 2).length;
+            // If we got fewer than the max page size, we're done
+            if (msgs.length < 20) break;
+            before = Math.min(...msgs.map((m) => m.id));
+          }
+        }
+        if (convs.length < 25) break;
+        page++;
+      }
+    }
+    return { synced: total };
   });
 
 export const sendChatwootMessage = createServerFn({ method: "POST" })
