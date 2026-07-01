@@ -14,6 +14,7 @@ import {
   getChatwootAgents,
   assignChatwootConversation,
   startConversationWithTemplate,
+  retryChatwootMessage,
 } from "@/lib/chatwoot.functions";
 import {
   getHubSpotContactByPhone,
@@ -25,7 +26,7 @@ import {
   type HsField,
 } from "@/lib/hubspot.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Send, Loader2, UserPlus, Play, Pause, ZoomIn, Paperclip, Smile, X, LayoutTemplate, ChevronLeft, Mic, Square, Volume2, VolumeX, Check, CheckCheck, AlertCircle } from "lucide-react";
+import { Search, Send, Loader2, UserPlus, Play, Pause, ZoomIn, Paperclip, Smile, X, LayoutTemplate, ChevronLeft, Mic, Square, Volume2, VolumeX, Check, CheckCheck, AlertCircle, RotateCcw } from "lucide-react";
 
 function playNotificationSound() {
   const Ctx = window.AudioContext ?? (window as any).webkitAudioContext;
@@ -420,6 +421,13 @@ function AtendimentoPage() {
       .catch(console.error)
       .finally(() => setLoadingMsgs(false));
 
+    // Poll every 15s to pick up delivery status updates from WhatsApp webhooks
+    const poll = setInterval(() => {
+      getChatwootMessages({ data: { conversationId: activeId } })
+        .then(setMessages)
+        .catch(() => {});
+    }, 15_000);
+
     const phone = conversations.find((c) => c.id === activeId)?.meta?.sender?.phone_number ?? "";
     setHubContact(null);
     if (phone) {
@@ -431,6 +439,8 @@ function AtendimentoPage() {
     } else {
       setHubLoading(false);
     }
+
+    return () => clearInterval(poll);
   }, [activeId]);
 
   const visible = useMemo(
@@ -460,21 +470,31 @@ function AtendimentoPage() {
     () =>
       messages
         .filter((m) => m.message_type !== 2 && (m.content || m.attachments?.length > 0))
-        .map((m) => ({
-          id: m.id,
-          from: m.message_type === 1 ? ("agent" as const) : ("contact" as const),
-          text: (m.content as string) || null,
-          attachments: (m.attachments ?? []) as any[],
-          at: new Date((m.created_at as number) * 1000).toISOString(),
-          // WhatsApp delivery status: 0=sent, 1=delivered, 2=read, 3=failed
-          deliveryStatus: (m.content_attributes?.whatsapp?.status as number | undefined)
-            ?? (m.content_attributes?.status as number | undefined),
-          // Error info from Chatwoot (e.g. 131026 Message undeliverable)
-          errorCode: (m.content_attributes?.whatsapp?.errorCode as string | undefined)
-            ?? (m.content_attributes?.error_code as string | undefined),
-          errorMessage: (m.content_attributes?.whatsapp?.errorMessage as string | undefined)
-            ?? (m.content_attributes?.error_message as string | undefined),
-        })),
+        .map((m) => {
+          // Chatwoot top-level status string → numeric delivery status
+          const statusStr = m.status as string | undefined;
+          const statusFromStr = statusStr === "read" ? 2
+            : statusStr === "delivered" ? 1
+            : statusStr === "sent" ? 0
+            : statusStr === "failed" ? 3
+            : undefined;
+          return {
+            id: m.id,
+            from: m.message_type === 1 ? ("agent" as const) : ("contact" as const),
+            text: (m.content as string) || null,
+            attachments: (m.attachments ?? []) as any[],
+            at: new Date((m.created_at as number) * 1000).toISOString(),
+            // WhatsApp delivery status: 0=sent, 1=delivered, 2=read, 3=failed
+            deliveryStatus: (m.content_attributes?.whatsapp?.status as number | undefined)
+              ?? (m.content_attributes?.status as number | undefined)
+              ?? statusFromStr,
+            // Error info from Chatwoot (e.g. 131026 Message undeliverable)
+            errorCode: (m.content_attributes?.whatsapp?.errorCode as string | undefined)
+              ?? (m.content_attributes?.error_code as string | undefined),
+            errorMessage: (m.content_attributes?.whatsapp?.errorMessage as string | undefined)
+              ?? (m.content_attributes?.error_message as string | undefined),
+          };
+        }),
     [messages]
   );
 
@@ -902,13 +922,30 @@ function AtendimentoPage() {
 
                         {/* Error banner for failed messages */}
                         {(m.errorCode || m.deliveryStatus === 3) && (
-                          <div className="mt-1 flex items-start gap-1.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-2.5 py-1.5 text-[11px] text-red-600 dark:text-red-400">
-                            <AlertCircle className="h-3 w-3 mt-px shrink-0" />
-                            <span>
-                              {m.errorMessage
-                                ? `Erro ${m.errorCode ? `${m.errorCode}: ` : ""}${m.errorMessage}`
-                                : `Erro ${m.errorCode ?? ""}: mensagem não entregue`}
-                            </span>
+                          <div className="mt-1 flex items-start justify-between gap-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-2.5 py-1.5 text-[11px] text-red-600 dark:text-red-400">
+                            <div className="flex items-start gap-1.5">
+                              <AlertCircle className="h-3 w-3 mt-px shrink-0" />
+                              <span>
+                                {m.errorMessage
+                                  ? `Erro ${m.errorCode ? `${m.errorCode}: ` : ""}${m.errorMessage}`
+                                  : `Erro ${m.errorCode ?? ""}: mensagem não entregue`}
+                              </span>
+                            </div>
+                            <button
+                              title="Reenviar mensagem"
+                              onClick={async () => {
+                                try {
+                                  await retryChatwootMessage({ data: { conversationId: active!.id, messageId: m.id } });
+                                  const updated = await getChatwootMessages({ data: { conversationId: active!.id } });
+                                  setMessages(updated);
+                                } catch {
+                                  // retry may not be supported for all channel types
+                                }
+                              }}
+                              className="shrink-0 rounded p-0.5 hover:bg-red-100 dark:hover:bg-red-900/40"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                            </button>
                           </div>
                         )}
 
@@ -930,6 +967,13 @@ function AtendimentoPage() {
             </div>
 
             <div className="border-t border-[#e5e5e5] dark:border-[#2a2a2a] px-6 py-4">
+              {/* 24h window warning */}
+              {active && active.can_reply === false && (
+                <div className="mb-3 flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-400">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>Fora da janela de 24h — use um template para iniciar a conversa.</span>
+                </div>
+              )}
               {/* File preview */}
               {attachFile && attachFile.file.type.startsWith("audio/") ? (
                 <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-[#e5e5e5] dark:border-[#2a2a2a] bg-[#f8f8f8] dark:bg-[#1e1e1e] px-3 py-2">
@@ -1150,14 +1194,15 @@ function AtendimentoPage() {
                   value={draft}
                   onChange={(e) => { setDraft(e.target.value); setDraftIsTemplate(false); }}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                  placeholder="Digite uma mensagem…"
+                  placeholder={active?.can_reply === false ? "Use um template para responder…" : "Digite uma mensagem…"}
+                  disabled={active?.can_reply === false}
                   className="h-11 flex-1"
                 />
                 <Button
                   size="icon"
                   className="h-11 w-11 shrink-0 bg-[#090909] text-white hover:bg-[#090909]/90"
                   onClick={handleSend}
-                  disabled={sending || (!draft.trim() && !attachFile)}
+                  disabled={sending || (!draft.trim() && !attachFile) || active?.can_reply === false}
                 >
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
